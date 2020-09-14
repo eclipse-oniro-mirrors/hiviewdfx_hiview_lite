@@ -18,6 +18,8 @@
 #include "hiview_log.h"
 #include "hiview_config.h"
 
+#include <stdint.h>
+
 HiviewConfig g_hiviewConfig = {
     .outputOption = OUTPUT_OPTION_FLOW,
     .level = HILOG_LV_DEBUG,
@@ -29,7 +31,7 @@ HiviewConfig g_hiviewConfig = {
 static void HiviewConfigInit(void)
 {
     g_hiviewConfig.hiviewInited = FALSE;
-    g_hiviewConfig.logOutputModule = 0xFFFFFFFFFFFFFFFF;
+    g_hiviewConfig.logOutputModule = UINT64_MAX;
     g_hiviewConfig.writeFailureCount = 0;
 }
 CORE_INIT_PRI(HiviewConfigInit, 0);
@@ -85,7 +87,7 @@ boolean SetLogOutputModule(uint8 mod)
         g_hiviewConfig.logOutputModule &= (1 << mod);
         return TRUE;
     } else if (mod == HILOG_MODULE_MAX) {
-        g_hiviewConfig.logOutputModule = 0xFFFFFFFFFFFFFFFF;
+        g_hiviewConfig.logOutputModule = UINT64_MAX;
         return TRUE;
     } else {
         return FALSE;
