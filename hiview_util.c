@@ -17,7 +17,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "los_hwi.h"
 #include "cmsis_os.h"
 #include "utils_file.h"
 
@@ -59,27 +58,11 @@ HiviewMutexId_t HIVIEW_MutexInit()
 
 void HIVIEW_MutexLock(HiviewMutexId_t mutex)
 {
-    if (OS_INT_ACTIVE) {
-        __disable_irq();
-        return;
-    }
-
-    if (mutex == NULL) {
-        return;
-    }
     osMutexAcquire((osMutexId_t)mutex, HIVIEW_WAIT_FOREVER);
 }
 
 void HIVIEW_MutexUnlock(HiviewMutexId_t mutex)
 {
-    if (OS_INT_ACTIVE) {
-        __enable_irq();
-        return;
-    }
-
-    if (mutex == NULL) {
-        return;
-    }
     osMutexRelease((osMutexId_t)mutex);
 }
 
