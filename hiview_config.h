@@ -16,7 +16,9 @@
 #ifndef HOS_LITE_HIVIEW_CONFIG_H
 #define HOS_LITE_HIVIEW_CONFIG_H
 
-#include "hos_types.h"
+#include <stdint.h>
+
+#include "ohos_types.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -25,11 +27,7 @@ extern "C" {
 #endif /* End of #ifdef __cplusplus */
 
 /* Set the following parameters for different products based on their own resources. */
-#ifdef HI3861_PRODUCT_TYPE
 #define HIVIEW_FILE_DIR                    ""
-#else
-#define HIVIEW_FILE_DIR                    "user/log/"
-#endif
 /* file path config */
 #define HIVIEW_FILE_PATH_LOG               HIVIEW_FILE_DIR"debug.log"
 #define HIVIEW_FILE_PATH_FAULT_EVENT       HIVIEW_FILE_DIR"fault.event"
@@ -81,52 +79,6 @@ typedef enum {
 } HiviewOutputOption;
 
 extern HiviewConfig g_hiviewConfig;
-
-/**
- * Dynamically adjust the Log Output Level.
- * @param level log level. Logs of this level or higher will be generated.
- * @return TRUE/FALSE
- **/
-boolean SetLogLevel(uint8 level);
-
-/**
- * Enable or disable the log function.
- * @param flag HIVIEW_FEATURE_ON/HIVIEW_FEATURE_OFF
- **/
-void SwitchLog(uint8 flag);
-
-/**
- * Enable or disable the event function.
- * @param flag HIVIEW_FEATURE_ON/HIVIEW_FEATURE_OFF
- **/
-void SwitchEvent(uint8 flag);
-
-/**
- * Enable or disable the dump function.
- * @param flag HIVIEW_FEATURE_ON/HIVIEW_FEATURE_OFF
- **/
-void SwitchDump(uint8 flag);
-
-/**
- * Enable the log output of a specified module.
- * @param mod module id.
- * @return TRUE/FALSE
- **/
-boolean OpenLogOutputModule(uint8 mod);
-
-/**
- * Disable the log output of a specified module.
- * @param mod module id.
- * @return TRUE/FALSE
- **/
-boolean CloseLogOutputModule(uint8 mod);
-
-/**
- * Enable the log output of a specified module and disable the log output of other modules.
- * @param mod module id. If the value of the module id is HILOG_MODULE_MAX, the log output of all modules is enabled.
- * @return TRUE/FALSE
- **/
-boolean SetLogOutputModule(uint8 mod);
 
 #ifdef __cplusplus
 #if __cplusplus

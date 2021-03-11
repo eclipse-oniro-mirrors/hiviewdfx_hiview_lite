@@ -16,7 +16,7 @@
 #ifndef HOS_LITE_HIVIEW_DEF_H
 #define HOS_LITE_HIVIEW_DEF_H
 
-#include "hos_types.h"
+#include "ohos_types.h"
 
 #ifdef __cplusplus
 #if __cplusplus

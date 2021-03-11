@@ -14,7 +14,7 @@
  */
 
 #include "securec.h"
-#include "hos_types.h"
+#include "ohos_types.h"
 #include "hiview_def.h"
 #include "hiview_util.h"
 #include "hiview_file.h"

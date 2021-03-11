@@ -11,8 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-static_library("common_lite") {
+static_library("hiview_lite") {
   sources = [
+    "hiview_service.c",
     "hiview_cache.c",
     "hiview_config.c",
     "hiview_file.c",
@@ -20,10 +21,9 @@ static_library("common_lite") {
   ]
   cflags = [ "-Wall" ]
   include_dirs = [
-    "//base/hiviewdfx/interfaces/kits/hilog_lite",
-    "//base/hiviewdfx/services/hiview_lite",
+    "//base/hiviewdfx/hiview_lite",
     "//kernel/liteos_m/kal",
-    "//vendor/hisi/hi3861/hi3861/platform/os/Huawei_LiteOS/components/lib/libc/musl/include",
-    "//utils/native/lite/include",
+    "//foundation/distributedschedule/samgr_lite/interfaces/kits/samgr",
   ]
+  deps = []
 }

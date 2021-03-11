@@ -16,7 +16,7 @@
 #ifndef HOS_LITE_HIVIEW_FILE_H
 #define HOS_LITE_HIVIEW_FILE_H
 
-#include "hos_types.h"
+#include "ohos_types.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -70,7 +70,7 @@ typedef struct {
 /**
  * Initializes the file object.
  *
- * @param fp the pointer of hiview file object.
+ * @param fp The address of hivew file object.
  * @param type file type.
  * @param size file size.
  * @return TRUE if success, otherwise FALSE.

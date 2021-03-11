@@ -13,16 +13,13 @@
  * limitations under the License.
  */
 
-#include "hos_types.h"
-#include "hos_init.h"
-#include "hiview_log.h"
+#include "ohos_types.h"
+#include "ohos_init.h"
 #include "hiview_config.h"
-
-#include <stdint.h>
 
 HiviewConfig g_hiviewConfig = {
     .outputOption = OUTPUT_OPTION_FLOW,
-    .level = HILOG_LV_DEBUG,
+    .level = 1,    /* Control log output level. HILOG_LV_XXX, default is HILOG_LV_DEBUG */
     .logSwitch = HIVIEW_FEATURE_ON,
     .dumpSwitch = HIVIEW_FEATURE_OFF,
     .eventSwitch = HIVIEW_FEATURE_OFF,
@@ -35,61 +32,3 @@ static void HiviewConfigInit(void)
     g_hiviewConfig.writeFailureCount = 0;
 }
 CORE_INIT_PRI(HiviewConfigInit, 0);
-
-boolean SetLogLevel(uint8 level)
-{
-    if (level >= HILOG_LV_DEBUG && level < HILOG_MODULE_MAX) {
-        g_hiviewConfig.level = level;
-        return TRUE;
-    }
-    return FALSE;
-}
-
-void SwitchLog(uint8 flag)
-{
-    (flag == HIVIEW_FEATURE_ON) ? (g_hiviewConfig.logSwitch = HIVIEW_FEATURE_ON) :
-    (g_hiviewConfig.logSwitch = HIVIEW_FEATURE_OFF);
-}
-
-void SwitchEvent(uint8 flag)
-{
-    (flag == HIVIEW_FEATURE_ON) ? (g_hiviewConfig.eventSwitch = HIVIEW_FEATURE_ON) :
-    (g_hiviewConfig.eventSwitch = HIVIEW_FEATURE_OFF);
-}
-
-void SwitchDump(uint8 flag)
-{
-    (flag == HIVIEW_FEATURE_ON) ? (g_hiviewConfig.dumpSwitch = HIVIEW_FEATURE_ON) :
-    (g_hiviewConfig.dumpSwitch = HIVIEW_FEATURE_OFF);
-}
-
-boolean OpenLogOutputModule(uint8 mod)
-{
-    if (mod < HILOG_MODULE_MAX) {
-        g_hiviewConfig.logOutputModule |= (1 << mod);
-        return TRUE;
-    }
-    return FALSE;
-}
-
-boolean CloseLogOutputModule(uint8 mod)
-{
-    if (mod < HILOG_MODULE_MAX) {
-        g_hiviewConfig.logOutputModule &= (~(1 << mod));
-        return TRUE;
-    }
-    return FALSE;
-}
-
-boolean SetLogOutputModule(uint8 mod)
-{
-    if (mod < HILOG_MODULE_MAX) {
-        g_hiviewConfig.logOutputModule &= (1 << mod);
-        return TRUE;
-    } else if (mod == HILOG_MODULE_MAX) {
-        g_hiviewConfig.logOutputModule = UINT64_MAX;
-        return TRUE;
-    } else {
-        return FALSE;
-    }
-}

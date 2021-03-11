@@ -39,16 +39,22 @@ void HIVIEW_MemFree(uint8 modId, void *pMem)
     free(pMem);
 }
 
-uint64 HIVIEW_GetCurrentTime()
+uint32 HIVIEW_GetCurrentTime()
 {
-    return osKernelGetTickCount();
+    uint32 perSec = osKernelGetTickFreq();
+
+    if (perSec) {
+        return osKernelGetTickCount() * (HIVIEW_MS_PER_SECOND / perSec);
+    } else {
+        return 0;
+    }
 }
 
 int32 HIVIEW_RtcGetCurrentTime(uint64 *val, HIVIEW_RtcTime *time)
 {
     (void)val;
     (void)time;
-    return HOS_SUCCESS;
+    return OHOS_SUCCESS;
 }
 
 HiviewMutexId_t HIVIEW_MutexInit()
