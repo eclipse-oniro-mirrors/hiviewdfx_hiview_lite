@@ -2,6 +2,7 @@
 
 -   [Overview](#section469617221261)
 -   [Architecture](#section15884114210197)
+-   [Repositories Involved](#section767551120815)
 
 ## Overview<a name="section469617221261"></a>
 
@@ -25,3 +26,12 @@ CORE\_INIT:
 
 2. Memory management and file system operations are started normally. Memory can be requested and files can be created as required.
 
+## Repositories Involved<a name="section767551120815"></a>
+
+[DFX subsystem](https://gitee.com/openharmony/docs/blob/master/en/readme/dfx.md)
+
+[hiviwdfx\_hilog\_lite](https://gitee.com/openharmony/hiviewdfx_hilog_lite/blob/master/README_.md)
+
+**hiviwdfx\_hiview\_lite**
+
+[hiviwdfx\_hievent\_lite](https://gitee.com/openharmony/hiviewdfx_hievent_lite/blob/master/README.md)

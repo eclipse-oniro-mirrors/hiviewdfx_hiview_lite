@@ -2,6 +2,7 @@
 
 -   [简介](#section469617221261)
 -   [架构](#section15884114210197)
+-   [相关仓](#section767551120815)
 
 ## 简介<a name="section469617221261"></a>
 
@@ -25,3 +26,15 @@ CORE\_INIT阶段：
 
 2\)   该阶段内存管理、文件系统已经正常启动，可按需申请内存并创建文件。
 
+-   [相关仓](#section767551120815)
+
+
+## 相关仓<a name="section767551120815"></a>
+
+[DFX子系统](https://gitee.com/openharmony/docs/blob/master/zh-cn/readme/DFX%E5%AD%90%E7%B3%BB%E7%BB%9F.md)
+
+[hiviwdfx\_hilog\_lite](https://gitee.com/openharmony/hiviewdfx_hilog_lite/blob/master/README_zh.md)
+
+**hiviwdfx\_hiview\_lite**
+
+[hiviwdfx\_hievent\_lite](https://gitee.com/openharmony/hiviewdfx_hievent_lite/blob/master/README_zh.md)
