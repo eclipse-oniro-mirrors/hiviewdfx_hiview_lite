@@ -18,17 +18,17 @@
 #include "hiview_config.h"
 
 HiviewConfig g_hiviewConfig = {
-    .outputOption = OUTPUT_OPTION_FLOW,
-    .level = 1,    /* Control log output level. HILOG_LV_XXX, default is HILOG_LV_DEBUG */
-    .logSwitch = HIVIEW_FEATURE_ON,
-    .dumpSwitch = HIVIEW_FEATURE_OFF,
-    .eventSwitch = HIVIEW_FEATURE_OFF,
+    .outputOption = OUTPUT_OPTION,
+    .level = OUTPUT_LEVEL,    /* Control log output level. HILOG_LV_XXX, default is HILOG_LV_DEBUG */
+    .logSwitch = HILOG_LITE_SWITCH,
+    .dumpSwitch = DUMP_LITE_SWITCH,
+    .eventSwitch = HIEVENT_LITE_SWITCH,
 };
 
 static void HiviewConfigInit(void)
 {
     g_hiviewConfig.hiviewInited = FALSE;
-    g_hiviewConfig.logOutputModule = UINT64_MAX;
+    g_hiviewConfig.logOutputModule = (uint64_t)LOG_OUTPUT_MODULE;
     g_hiviewConfig.writeFailureCount = 0;
 }
 CORE_INIT_PRI(HiviewConfigInit, 0);
