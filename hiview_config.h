@@ -35,12 +35,6 @@ extern "C" {
 #define HIVIEW_FILE_PATH_STAT_EVENT        HIVIEW_FILE_DIR"stat.event"
 #define HIVIEW_FILE_PATH_DUMP              HIVIEW_FILE_DIR"dump.dat"
 
-/* file size config */
-#define HIVIEW_LOG_FILE_SIZE               (8 * 1024)
-#define FAULT_EVENT_FILE_SIZE              (1 * 1024)
-#define UE_EVENT_FILE_SIZE                 (1 * 1024)
-#define STAT_EVENT_FILE_SIZE               (1 * 1024)
-
 /* cache size config */
 #define LOG_STATIC_CACHE_SIZE              1024            /* Must be greater than HIVIEW_FILE_BUF_SIZE. */
 #define EVENT_CACHE_SIZE                   256             /* Must be greater than HIVIEW_FILE_BUF_SIZE. */
