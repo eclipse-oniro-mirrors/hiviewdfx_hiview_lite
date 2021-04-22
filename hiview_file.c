@@ -17,6 +17,7 @@
 #include "ohos_types.h"
 #include "hiview_def.h"
 #include "hiview_util.h"
+#include "log.h"
 #include "hiview_file.h"
 
 /* Refresh the file header information after every 10 file operations. */
@@ -115,6 +116,19 @@ boolean ReadFileHeader(HiviewFile *fp)
     }
 }
 
+static boolean IsHiviewEvent(HiviewFile *fp)
+{
+    if (fp == NULL) {
+        return FALSE;
+    }
+
+    if ((fp->type == HIVIEW_FAULT_EVENT_FILE) || (fp->type == HIVIEW_UE_EVENT_FILE) ||
+        (fp->type == HIVIEW_STAT_EVENT_FILE)) {
+        return TRUE;
+    }
+        return FALSE;
+}
+
 int32 WriteToFile(HiviewFile *fp, const uint8 *data, uint32 len)
 {
     if (fp == NULL || fp->fhandle < 0 || len == 0 || GetFileFreeSize(fp) < len) {
@@ -125,6 +139,10 @@ int32 WriteToFile(HiviewFile *fp, const uint8 *data, uint32 len)
     HiviewFileHeader *h = &(fp->header);
     // overflow
     if (h->wCursor + len > h->size) {
+        /* Add logs for dotting event files which are overwritten. */
+        if (IsHiviewEvent(fp)) {
+            HILOG_ERROR(HILOG_MODULE_HIVIEW, "Write file has overflow, the previous log may be overriding!");
+        }
         firstLen = h->size - h->wCursor;
         if (firstLen > 0) {
             if ((HIVIEW_FileSeek(fp->fhandle, h->wCursor, HIVIEW_SEEK_SET) < 0) ||
