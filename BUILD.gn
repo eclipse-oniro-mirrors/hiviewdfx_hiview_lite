@@ -16,7 +16,7 @@ declare_args() {
   ohos_hiviewdfx_hilog_lite_level = 1
   ohos_hiviewdfx_hilog_lite_log_switch = 1
   ohos_hiviewdfx_dump_lite_dump_switch = 0
-  ohos_hiviewdfx_hievent_lite_event_switch = 0
+  ohos_hiviewdfx_hievent_lite_event_switch = 1
   ohos_hiviewdfx_hiview_lite_output_module = -1
 }
 static_library("hiview_lite") {
