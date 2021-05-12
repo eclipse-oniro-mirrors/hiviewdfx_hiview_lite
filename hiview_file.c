@@ -84,7 +84,13 @@ boolean WriteFileHeader(HiviewFile *fp)
 
     int32 ret;
     if (HIVIEW_FileSeek(fp->fhandle, 0, HIVIEW_SEEK_SET) >= 0) {
-        ret = HIVIEW_FileWrite(fp->fhandle, (uint8 *)&(fp->header), sizeof(HiviewFileHeader));
+        HiviewFileHeader tmpHeader = fp->header;
+#if LITTLE_ENDIAN_SYSTEM
+        tmpHeader.common.prefix = Change32Endian(tmpHeader.common.prefix);
+        tmpHeader.common.defineFileVersion = Change32Endian(tmpHeader.common.defineFileVersion);
+        tmpHeader.createTime = Change32Endian(tmpHeader.createTime);
+#endif
+        ret = HIVIEW_FileWrite(fp->fhandle, (uint8 *)&(tmpHeader), sizeof(HiviewFileHeader));
         if (ret == sizeof(HiviewFileHeader)) {
             return TRUE;
         }
@@ -107,6 +113,11 @@ boolean ReadFileHeader(HiviewFile *fp)
         return FALSE;
     }
     ret = HIVIEW_FileRead(fp->fhandle, (uint8 *)&h, sizeof(HiviewFileHeader));
+#if LITTLE_ENDIAN_SYSTEM
+    h.common.prefix = Change32Endian(h.common.prefix);
+    h.common.defineFileVersion = Change32Endian(h.common.defineFileVersion);
+    h.createTime = Change32Endian(h.createTime);
+#endif
     if ((ret == sizeof(HiviewFileHeader)) && (h.createTime < t) &&
         ((h.common.prefix & 0xFFFFFF00) == HIVIEW_FILE_HEADER_PREFIX_MASK)) {
         memcpy_s(&(fp->header), sizeof(HiviewFileHeader), (void *)&h, sizeof(HiviewFileHeader));
