@@ -134,3 +134,21 @@ uint8 HIVIEW_WdgResetFlag()
     /* Depend:HAL_WdgGetResetFlag */
     return 1;
 }
+
+uint32 Change32Endian(uint32 num)
+{
+    unsigned char *buffer = (unsigned char *)&num;
+    uint32 newEndian = (buffer[3] & 0xFF);
+    newEndian |= ((buffer[2] << 8) & 0xFF00);
+    newEndian |= ((buffer[1] << 16) & 0xFF0000);
+    newEndian |= ((buffer[0] << 24) & 0xFF000000);
+    return newEndian;
+}
+
+uint16 Change16Endian(uint16 num)
+{
+    unsigned char* buffer = (unsigned char*)&num;
+    uint16 newEndian = (buffer[1] & 0xFF);
+    newEndian |= ((buffer[0] << 8) & 0xFF00);
+    return newEndian;
+}

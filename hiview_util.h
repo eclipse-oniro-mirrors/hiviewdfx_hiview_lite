@@ -39,6 +39,10 @@ extern "C" {
 #define HIVIEW_SEEK_END 2
 #endif
 
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define LITTLE_ENDIAN_SYSTEM 1
+#endif
+
 typedef void *HiviewMutexId_t;
 
 typedef struct {
@@ -79,6 +83,8 @@ uint32 HIVIEW_GetStackSize(void);
 void HIVIEW_WatchDogSystemReset(void);
 uint8 HIVIEW_WdgResetFlag(void);
 
+uint16 Change16Endian(uint16 num);
+uint32 Change32Endian(uint32 num);
 #ifdef __cplusplus
 #if __cplusplus
 }
