@@ -54,36 +54,6 @@ typedef struct {
 } HiLogModuleInfo;
 #pragma pack()
 
-#ifndef TEMP_HILOG
-#define TEMP_HIVIEW
-typedef enum {
-    LOG_MULTI_PARA_0 = 0,
-    LOG_MULTI_PARA_1 = 1,
-    LOG_MULTI_PARA_2 = 2,
-    LOG_MULTI_PARA_3 = 3,
-    LOG_MULTI_PARA_4 = 4,
-    LOG_MULTI_PARA_5 = 5,
-    LOG_MULTI_PARA_MAX = 6
-} LogMultiParaIndex;
-
-#pragma pack(1)
-typedef struct {
-    uint8 head;
-    uint8 module;
-    uint8 level : 4;
-    uint8 valueNumber : 4;
-    uint8 task;
-    uint32 time;    /* seconds */
-    const char *fmt;
-} HiLogCommon;
-
-typedef struct {
-    HiLogCommon commonContent;
-    uint32 values[LOG_MULTI_PARA_MAX];
-} HiLogContent;
-#pragma pack()
-#endif
-
 typedef struct {
     uint8 last : 1;   /* Indicates whether the last parameter. */
     uint8 id : 4;
