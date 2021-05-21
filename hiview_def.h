@@ -47,6 +47,15 @@ extern "C" {
 #define UE_EVENT_PREFIX      9521
 #define STAT_EVENT_PREFIX    9522
 
+#pragma pack(1)
+typedef struct {
+    uint8 id;
+    const char *name; /* LOG_MODULE_NAME_LEN */
+} HiLogModuleInfo;
+#pragma pack()
+
+#ifndef TEMP_HILOG
+#define TEMP_HIVIEW
 typedef enum {
     LOG_MULTI_PARA_0 = 0,
     LOG_MULTI_PARA_1 = 1,
@@ -58,11 +67,6 @@ typedef enum {
 } LogMultiParaIndex;
 
 #pragma pack(1)
-typedef struct {
-    uint8 id;
-    const char *name; /* LOG_MODULE_NAME_LEN */
-} HiLogModuleInfo;
-
 typedef struct {
     uint8 head;
     uint8 module;
@@ -78,6 +82,7 @@ typedef struct {
     uint32 values[LOG_MULTI_PARA_MAX];
 } HiLogContent;
 #pragma pack()
+#endif
 
 typedef struct {
     uint8 last : 1;   /* Indicates whether the last parameter. */
