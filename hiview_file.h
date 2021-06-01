@@ -30,7 +30,9 @@ extern "C" {
 #define HIVIEW_FILE_HEADER_PREFIX_MASK     0x48565700      /* HVW ASCii + 0x00 */
 #define HIVIEW_FILE_HEADER_MAIN_VERSION    1               /* Main version:1 */
 #define HIVIEW_FILE_HEADER_SUB_VERSION     10              /* Sub version:10 (lite) */
-#define HIVIEW_FILE_HEADER_DEFINE_FILE_VER 200602001       /* XML file version:200602001 */
+#define HIVIEW_UE_EVENT_VER                991231100       /* UE event version */
+#define HIVIEW_FAULT_EVENT_VER             991231000       /* Fault event version */
+#define HIVIEW_STATIC_EVENT_VER            991231000       /* Static event version */
 #define HIVIEW_CONF_PRODUCT_VER_STR        "1.0.0"
 
 typedef enum {
@@ -45,6 +47,7 @@ typedef enum {
 #pragma pack(1)
 typedef struct {
     uint32 prefix;
+    uint8 type;     /* HiviewFileType */
     uint8 codeMainVersion;
     uint8 codeSubVersion;
     uint32 defineFileVersion;
@@ -62,7 +65,6 @@ typedef struct {
     HiviewFileHeader header;
     const char *path;
     int32 fhandle;  /* Circular file */
-    uint8 type;     /* HiviewFileType */
     uint8 headerUpdateCtl;
 } HiviewFile;
 #pragma pack()

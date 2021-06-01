@@ -38,15 +38,6 @@ extern "C" {
 #define TAIL_LINE_BREAK                    2
 #define READ_FILE_BUF_MAX_SIZE             1024
 
-/**
- * Event id : eventPrefix + eventId
- * eventPrefix: 9520/9521/9522
- * eventId: 0-65535
- **/
-#define FAULT_EVENT_PREFIX   9520
-#define UE_EVENT_PREFIX      9521
-#define STAT_EVENT_PREFIX    9522
-
 #pragma pack(1)
 typedef struct {
     uint8 id;
