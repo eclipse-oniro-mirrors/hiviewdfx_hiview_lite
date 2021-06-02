@@ -17,6 +17,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "cmsis_os.h"
 #include "utils_file.h"
 
@@ -26,6 +27,7 @@ extern void __enable_irq(void);
 
 #define HIVIEW_WAIT_FOREVER           0xFFFFFFFF
 #define HIVIEW_MS_PER_SECOND          1000
+#define HIVIEW_NS_PER_MILISECOND      1000000
 
 void *HIVIEW_MemAlloc(uint8 modId, uint32 size)
 {
@@ -39,12 +41,12 @@ void HIVIEW_MemFree(uint8 modId, void *pMem)
     free(pMem);
 }
 
-uint32 HIVIEW_GetCurrentTime()
+uint64 HIVIEW_GetCurrentTime()
 {
-    uint32 perSec = osKernelGetTickFreq();
-
-    if (perSec) {
-        return osKernelGetTickCount() * (HIVIEW_MS_PER_SECOND / perSec);
+    struct timespec current = {0};
+    int ret = clock_gettime(CLOCK_REALTIME, &current);
+    if (ret == 0) {
+        return (uint64)current.tv_sec * HIVIEW_MS_PER_SECOND + current.tv_nsec / HIVIEW_NS_PER_MILISECOND;
     } else {
         return 0;
     }
