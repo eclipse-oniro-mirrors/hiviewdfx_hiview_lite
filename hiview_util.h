@@ -56,7 +56,7 @@ typedef struct {
     uint16 millisecond;
 } HIVIEW_RtcTime;
 
-uint32 HIVIEW_GetCurrentTime(void);
+uint64 HIVIEW_GetCurrentTime(void);
 int32 HIVIEW_RtcGetCurrentTime(uint64 *val, HIVIEW_RtcTime *time);
 
 void *HIVIEW_MemAlloc(uint8 modId, uint32 size);
