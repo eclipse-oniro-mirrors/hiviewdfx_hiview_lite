@@ -40,6 +40,8 @@ extern "C" {
 #define EVENT_CACHE_SIZE                   256             /* Must be greater than HIVIEW_FILE_BUF_SIZE. */
 #define JS_LOG_CACHE_SIZE                  512
 #define HIVIEW_FILE_BUF_SIZE               128
+#define HIVIEW_HILOG_FILE_BUF_SIZE         512
+#define HIVIEW_HIEVENT_FILE_BUF_SIZE       128
 
 /* RAM dump config */
 #define HIVIEW_DUMP_PRE_SIZE               (384 * 1024)
