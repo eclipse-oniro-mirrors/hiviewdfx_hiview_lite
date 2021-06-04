@@ -25,6 +25,21 @@
 
 static uint16 GetReadCursor(HiviewFile *fp);
 
+static uint32 GetDefineFileVersion(uint8 type)
+{
+    switch (type) {
+        case HIVIEW_UE_EVENT_FILE:
+            return HIVIEW_UE_EVENT_VER;
+        case HIVIEW_STAT_EVENT_FILE:
+            return HIVIEW_STATIC_EVENT_VER;
+        case HIVIEW_FAULT_EVENT_FILE:
+            return HIVIEW_FAULT_EVENT_VER;
+        default:
+            // non-event file
+            return 0;
+    }
+}
+
 boolean InitHiviewFile(HiviewFile *fp, HiviewFileType type, uint32 size)
 {
     if (fp == NULL || fp->path == NULL) {
@@ -35,14 +50,15 @@ boolean InitHiviewFile(HiviewFile *fp, HiviewFileType type, uint32 size)
     if (fp->fhandle < 0) {
         return FALSE;
     }
-    fp->type = (uint8)type;
+
     fp->headerUpdateCtl = 0;
     HiviewFileHeader *pHeader = &(fp->header);
     FileHeaderCommon *pCommon = &(pHeader->common);
+    pCommon->type = (uint8)type;
     pHeader->size = size + sizeof(HiviewFileHeader);
     // Create file for the first time
     if (ReadFileHeader(fp) == FALSE) {
-        switch (fp->type) {
+        switch (pCommon->type) {
             case HIVIEW_LOG_TEXT_FILE:
                 pCommon->prefix = HIVIEW_FILE_HEADER_PREFIX_TEXT;
                 break;
@@ -59,7 +75,7 @@ boolean InitHiviewFile(HiviewFile *fp, HiviewFileType type, uint32 size)
         }
         pCommon->codeMainVersion = HIVIEW_FILE_HEADER_MAIN_VERSION;
         pCommon->codeSubVersion = HIVIEW_FILE_HEADER_SUB_VERSION;
-        pCommon->defineFileVersion = HIVIEW_FILE_HEADER_DEFINE_FILE_VER;
+        pCommon->defineFileVersion = GetDefineFileVersion(pCommon->type);
         pHeader->createTime = (uint32)(HIVIEW_GetCurrentTime() / MS_PER_SECOND);
         pHeader->usedSize = sizeof(HiviewFileHeader);
         pHeader->wCursor = sizeof(HiviewFileHeader);
@@ -70,7 +86,7 @@ boolean InitHiviewFile(HiviewFile *fp, HiviewFileType type, uint32 size)
         // Version number may change after system upgrade
         pCommon->codeMainVersion = HIVIEW_FILE_HEADER_MAIN_VERSION;
         pCommon->codeSubVersion = HIVIEW_FILE_HEADER_SUB_VERSION;
-        pCommon->defineFileVersion = HIVIEW_FILE_HEADER_DEFINE_FILE_VER;
+        pCommon->defineFileVersion = GetDefineFileVersion(pCommon->type);
     }
 
     return TRUE;
@@ -133,8 +149,9 @@ static boolean IsHiviewEvent(HiviewFile *fp)
         return FALSE;
     }
 
-    if ((fp->type == HIVIEW_FAULT_EVENT_FILE) || (fp->type == HIVIEW_UE_EVENT_FILE) ||
-        (fp->type == HIVIEW_STAT_EVENT_FILE)) {
+    uint8 type = fp->header.common.type;
+    if ((type == HIVIEW_FAULT_EVENT_FILE) || (type == HIVIEW_UE_EVENT_FILE) ||
+        (type == HIVIEW_STAT_EVENT_FILE)) {
         return TRUE;
     }
         return FALSE;
