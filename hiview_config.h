@@ -27,7 +27,9 @@ extern "C" {
 #endif /* End of #ifdef __cplusplus */
 
 /* Set the following parameters for different products based on their own resources. */
+#ifndef HIVIEW_FILE_DIR
 #define HIVIEW_FILE_DIR                    ""
+#endif
 /* file path config */
 #define HIVIEW_FILE_PATH_LOG               HIVIEW_FILE_DIR"debug.log"
 #define HIVIEW_FILE_PATH_FAULT_EVENT       HIVIEW_FILE_DIR"fault.event"
