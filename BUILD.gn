@@ -20,9 +20,17 @@ declare_args() {
   ohos_hiviewdfx_hiview_lite_output_module = -1
   ohos_hiviewdfx_hiview_lite_dir = ""
 }
+
 config("hiview_lite_config") {
     defines = ["HIVIEW_FILE_DIR = \"$ohos_hiviewdfx_hiview_lite_dir\""]
+    include_dirs = [
+    "//base/hiviewdfx/hiview_lite",
+    "//kernel/liteos_m/kal",
+    "//foundation/distributedschedule/samgr_lite/interfaces/kits/samgr",
+    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
+  ]
 }
+
 static_library("hiview_lite") {
   sources = [
     "hiview_service.c",
@@ -39,12 +47,6 @@ static_library("hiview_lite") {
     "DUMP_LITE_SWITCH = $ohos_hiviewdfx_dump_lite_dump_switch",
     "HIEVENT_LITE_SWITCH = $ohos_hiviewdfx_hievent_lite_event_switch",
     "LOG_OUTPUT_MODULE = $ohos_hiviewdfx_hiview_lite_output_module"
-  ]
-  include_dirs = [
-    "//base/hiviewdfx/hiview_lite",
-    "//kernel/liteos_m/kal",
-    "//foundation/distributedschedule/samgr_lite/interfaces/kits/samgr",
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
   ]
   public_configs = [":hiview_lite_config"]
   deps = []

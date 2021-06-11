@@ -31,11 +31,17 @@ extern "C" {
 #define HIVIEW_FILE_DIR                    ""
 #endif
 /* file path config */
-#define HIVIEW_FILE_PATH_LOG               HIVIEW_FILE_DIR"debug.log"
-#define HIVIEW_FILE_PATH_FAULT_EVENT       HIVIEW_FILE_DIR"fault.event"
-#define HIVIEW_FILE_PATH_UE_EVENT          HIVIEW_FILE_DIR"ue.event"
-#define HIVIEW_FILE_PATH_STAT_EVENT        HIVIEW_FILE_DIR"stat.event"
+#define HIVIEW_FILE_OUT_PATH_LOG           HIVIEW_FILE_DIR"debug.log"
+#define HIVIEW_FILE_OUT_PATH_UE_EVENT      HIVIEW_FILE_DIR"ue.event"
+#define HIVIEW_FILE_OUT_PATH_FAULT_EVENT   HIVIEW_FILE_DIR"fault.event"
+#define HIVIEW_FILE_OUT_PATH_STAT_EVENT    HIVIEW_FILE_DIR"stat.event"
+
 #define HIVIEW_FILE_PATH_DUMP              HIVIEW_FILE_DIR"dump.dat"
+
+#define HIVIEW_FILE_PATH_LOG               HIVIEW_FILE_OUT_PATH_LOG".tmp"
+#define HIVIEW_FILE_PATH_UE_EVENT          HIVIEW_FILE_OUT_PATH_UE_EVENT".tmp"
+#define HIVIEW_FILE_PATH_FAULT_EVENT       HIVIEW_FILE_OUT_PATH_FAULT_EVENT".tmp"
+#define HIVIEW_FILE_PATH_STAT_EVENT        HIVIEW_FILE_OUT_PATH_STAT_EVENT".tmp"
 
 /* cache size config */
 #define LOG_STATIC_CACHE_SIZE              1024            /* Must be greater than HIVIEW_FILE_BUF_SIZE. */

@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "securec.h"
-#include "ohos_types.h"
+#include "hiview_config.h"
 #include "hiview_def.h"
-#include "hiview_util.h"
-#include "log.h"
 #include "hiview_file.h"
+#include "hiview_util.h"
+#include "ohos_types.h"
+#include "securec.h"
 
 /* Refresh the file header information after every 10 file operations. */
 #define FILE_HEADER_UPDATE_CTL   10
@@ -77,7 +77,7 @@ boolean InitHiviewFile(HiviewFile *fp, HiviewFileType type, uint32 size)
         pCommon->codeSubVersion = HIVIEW_FILE_HEADER_SUB_VERSION;
         pCommon->defineFileVersion = GetDefineFileVersion(pCommon->type);
         pHeader->createTime = (uint32)(HIVIEW_GetCurrentTime() / MS_PER_SECOND);
-        pHeader->usedSize = sizeof(HiviewFileHeader);
+        pHeader->rCursor = sizeof(HiviewFileHeader);
         pHeader->wCursor = sizeof(HiviewFileHeader);
         if (WriteFileHeader(fp) == FALSE) {
             return FALSE;
@@ -143,62 +143,28 @@ boolean ReadFileHeader(HiviewFile *fp)
     }
 }
 
-static boolean IsHiviewEvent(HiviewFile *fp)
-{
-    if (fp == NULL) {
-        return FALSE;
-    }
-
-    uint8 type = fp->header.common.type;
-    if ((type == HIVIEW_FAULT_EVENT_FILE) || (type == HIVIEW_UE_EVENT_FILE) ||
-        (type == HIVIEW_STAT_EVENT_FILE)) {
-        return TRUE;
-    }
-        return FALSE;
-}
-
 int32 WriteToFile(HiviewFile *fp, const uint8 *data, uint32 len)
 {
-    if (fp == NULL || fp->fhandle < 0 || len == 0 || GetFileFreeSize(fp) < len) {
+    if (fp == NULL || fp->fhandle < 0 || len == 0) {
         return 0;
     }
     int32 wLen = 0;
-    int32 firstLen, secondLen;
     HiviewFileHeader *h = &(fp->header);
     // overflow
     if (h->wCursor + len > h->size) {
-        /* Add logs for dotting event files which are overwritten. */
-        if (IsHiviewEvent(fp)) {
-            HILOG_ERROR(HILOG_MODULE_HIVIEW, "Write file has overflow, the previous log may be overriding!");
-        }
-        firstLen = h->size - h->wCursor;
-        if (firstLen > 0) {
-            if ((HIVIEW_FileSeek(fp->fhandle, h->wCursor, HIVIEW_SEEK_SET) < 0) ||
-                firstLen != HIVIEW_FileWrite(fp->fhandle, data, firstLen)) {
-                return 0;
-            }
-            h->wCursor += firstLen;
-            h->usedSize += firstLen;
-            wLen += firstLen;
-        }
-        // jump file header
-        h->wCursor = sizeof(HiviewFileHeader);
-        secondLen = len - firstLen;
-        if ((HIVIEW_FileSeek(fp->fhandle, h->wCursor, HIVIEW_SEEK_SET) > 0) && (secondLen > 0) &&
-            (secondLen == HIVIEW_FileWrite(fp->fhandle, data + firstLen, secondLen))) {
-            h->wCursor += secondLen;
-            h->usedSize += secondLen;
-            wLen += secondLen;
-        }
-    } else {
-        if (HIVIEW_FileSeek(fp->fhandle, h->wCursor, HIVIEW_SEEK_SET) < 0) {
+        if (ProcFile(fp, fp->outPath, HIVIEW_FILE_RENAME) != 0) {
             return 0;
         }
-        if ((int32)len == HIVIEW_FileWrite(fp->fhandle, data, len)) {
-            h->wCursor += len;
-            h->usedSize += len;
-            wLen += len;
+        if (fp->pFunc != NULL) {
+            fp->pFunc(fp->outPath, h->common.type, HIVIEW_FILE_FULL);
         }
+    }
+    if (HIVIEW_FileSeek(fp->fhandle, h->wCursor, HIVIEW_SEEK_SET) < 0) {
+        return 0;
+    }
+    if ((int32)len == HIVIEW_FileWrite(fp->fhandle, data, len)) {
+        h->wCursor += len;
+        wLen += len;
     }
     if (fp->headerUpdateCtl >= FILE_HEADER_UPDATE_CTL) {
         fp->headerUpdateCtl = 0;
@@ -217,40 +183,20 @@ int32 ReadFromFile(HiviewFile *fp, uint8 *data, uint32 readLen)
         return 0;
     }
 
-    uint32 usedSize = GetFileUsedSize(fp);
-    if (usedSize < readLen) {
+    HiviewFileHeader* h = &(fp->header);
+    uint32 wCursor = h->wCursor;
+    uint32 rCursor = h->rCursor;
+    if (wCursor < readLen) {
         return 0;
     }
-    int32 rLen = 0;
-    int32 firstLen, secondLen;
-    HiviewFileHeader *h = &(fp->header);
-    uint32 rCursor = GetReadCursor(fp);
-    // overflow
-    if (rCursor + readLen > h->size) {
-        firstLen = h->size - rCursor;
-        if (firstLen > 0) {
-            if ((HIVIEW_FileSeek(fp->fhandle, rCursor, HIVIEW_SEEK_SET) < 0) ||
-                (firstLen != HIVIEW_FileRead(fp->fhandle, data, firstLen))) {
-                return 0;
-            }
-            h->usedSize -= firstLen;
-            rLen += firstLen;
-        }
-        secondLen = readLen - firstLen;
-        // jump file header
-        if ((HIVIEW_FileSeek(fp->fhandle, sizeof(HiviewFileHeader), HIVIEW_SEEK_SET) > 0) &&
-            (secondLen > 0) && (secondLen == HIVIEW_FileRead(fp->fhandle, data + firstLen, secondLen))) {
-            h->usedSize -= secondLen;
-            rLen += secondLen;
-        }
+    int32 rLen = (readLen <= (wCursor - rCursor)) ? readLen : (wCursor - rCursor);
+    if (HIVIEW_FileSeek(fp->fhandle, rCursor, HIVIEW_SEEK_SET) < 0) {
+        return 0;
+    }
+    if ((int32)rLen == HIVIEW_FileRead(fp->fhandle, data, rLen)) {
+        h->rCursor += rLen;
     } else {
-        if (HIVIEW_FileSeek(fp->fhandle, rCursor, HIVIEW_SEEK_SET) < 0) {
-            return 0;
-        }
-        if ((int32)readLen == HIVIEW_FileRead(fp->fhandle, data, readLen)) {
-            h->usedSize -= readLen;
-            rLen += readLen;
-        }
+        rLen = 0;
     }
     if (fp->headerUpdateCtl >= FILE_HEADER_UPDATE_CTL) {
         fp->headerUpdateCtl = 0;
@@ -268,13 +214,7 @@ uint32 GetFileUsedSize(HiviewFile *fp)
     if (fp == NULL || fp->fhandle < 0) {
         return 0;
     }
-
-    HiviewFileHeader *h = &(fp->header);
-    if (h->usedSize > sizeof(HiviewFileHeader)) {
-        return h->usedSize - sizeof(HiviewFileHeader);
-    } else {
-        return 0;
-    }
+    return fp->header.wCursor;
 }
 
 uint32 GetFileFreeSize(HiviewFile *fp)
@@ -283,7 +223,7 @@ uint32 GetFileFreeSize(HiviewFile *fp)
         return 0;
     }
 
-    return (fp->header.size - fp->header.usedSize);
+    return (fp->header.size - fp->header.wCursor);
 }
 
 int32 CloseHiviewFile(HiviewFile *fp)
@@ -292,22 +232,112 @@ int32 CloseHiviewFile(HiviewFile *fp)
         if (WriteFileHeader(fp) == FALSE) {
             return -1;
         }
+        if (strcmp(fp->outPath, HIVIEW_FILE_OUT_PATH_LOG) != 0) {
+            HIVIEW_MemFree(MEM_POOL_HIVIEW_ID, fp->outPath);
+            fp->outPath = HIVIEW_FILE_OUT_PATH_LOG;
+        } else if (strcmp(fp->outPath, HIVIEW_FILE_OUT_PATH_UE_EVENT) != 0) {
+            HIVIEW_MemFree(MEM_POOL_HIVIEW_ID, fp->outPath);
+            fp->outPath = HIVIEW_FILE_OUT_PATH_UE_EVENT;
+        } else if (strcmp(fp->outPath, HIVIEW_FILE_OUT_PATH_FAULT_EVENT) != 0) {
+            HIVIEW_MemFree(MEM_POOL_HIVIEW_ID, fp->outPath);
+            fp->outPath = HIVIEW_FILE_OUT_PATH_FAULT_EVENT;
+        } else if (strcmp(fp->outPath, HIVIEW_FILE_OUT_PATH_STAT_EVENT) != 0) {
+            HIVIEW_MemFree(MEM_POOL_HIVIEW_ID, fp->outPath);
+            fp->outPath = HIVIEW_FILE_OUT_PATH_STAT_EVENT;
+        }
         return HIVIEW_FileClose(fp->fhandle);
     }
-
     return -1;
 }
 
-static uint16 GetReadCursor(HiviewFile *fp)
+int8 ProcFile(HiviewFile *fp, const char *dest, FileProcMode mode)
 {
-    if (fp == NULL || fp->fhandle < 0) {
-        return 0;
+    if (fp == NULL || fp->fhandle < 0 || HIVIEW_FileClose(fp->fhandle) != 0) {
+        return -1;
+    }
+    switch (mode) {
+        case HIVIEW_FILE_COPY:
+            if (HIVIEW_FileCopy(fp->path, dest) != 0) {
+                return -1;
+            }
+            fp->fhandle = HIVIEW_FileOpen(fp->path);
+            if (fp->fhandle < 0) {
+                return -1;
+            }
+            break;
+        case HIVIEW_FILE_RENAME: {
+            uint8 type = fp->header.common.type;
+            uint32 size = fp->header.size - sizeof(HiviewFileHeader);
+            if (HIVIEW_FileMove(fp->path, dest) != 0 || InitHiviewFile(fp, type, size) == FALSE) {
+                return -1;
+            }
+            break;
+        }
+        default:
+            return -1;
+    }
+    return 0;
+}
+
+int IsValidPath(const char *path)
+{
+    if (strcmp(path, HIVIEW_FILE_PATH_LOG) == 0 ||
+        strcmp(path, HIVIEW_FILE_PATH_UE_EVENT) == 0 ||
+        strcmp(path, HIVIEW_FILE_PATH_FAULT_EVENT) == 0 ||
+        strcmp(path, HIVIEW_FILE_PATH_STAT_EVENT) == 0 ||
+        strcmp(path, HIVIEW_FILE_OUT_PATH_LOG) == 0 ||
+        strcmp(path, HIVIEW_FILE_OUT_PATH_UE_EVENT) == 0 ||
+        strcmp(path, HIVIEW_FILE_OUT_PATH_FAULT_EVENT) == 0 ||
+        strcmp(path, HIVIEW_FILE_OUT_PATH_STAT_EVENT) == 0) {
+            return -1;
+    }
+    return 0;
+}
+
+void RegisterFileWatcher(HiviewFile *fp, FileProc func, const char *path)
+{
+    if (fp == NULL) {
+        return;
+    }
+    fp->pFunc = func;
+    if (path == NULL || IsValidPath(path) != 0) {
+        return;
     }
 
-    HiviewFileHeader *h = &(fp->header);
-    if (h->wCursor >= h->usedSize) {
-        return sizeof(HiviewFileHeader) + (h->wCursor - h->usedSize);
-    } else {
-        return (h->size - (h->usedSize - h->wCursor));
+    int len = strlen(path) + 1;
+    char* tmp = (char*)HIVIEW_MemAlloc(MEM_POOL_HIVIEW_ID, len);
+    if (tmp == NULL) {
+        return;
+    }
+    if (strcpy_s(tmp, len, path) != EOK) {
+        HIVIEW_MemFree(MEM_POOL_HIVIEW_ID, tmp);
+        return;
+    }
+    fp->outPath = tmp;
+}
+
+void UnRegisterFileWatcher(HiviewFile *fp, FileProc func)
+{
+    (void)func;
+    fp->pFunc = NULL;
+    if (IsValidPath(fp->outPath) == 0) {
+        HIVIEW_MemFree(MEM_POOL_HIVIEW_ID, fp->outPath);
+    }
+    switch (fp->header.common.type) {
+        case HIVIEW_FAULT_EVENT_FILE:
+            fp->outPath = HIVIEW_FILE_OUT_PATH_FAULT_EVENT;
+            break;
+        case HIVIEW_UE_EVENT_FILE:
+            fp->outPath = HIVIEW_FILE_OUT_PATH_UE_EVENT;
+            break;
+        case HIVIEW_STAT_EVENT_FILE:
+            fp->outPath = HIVIEW_FILE_OUT_PATH_STAT_EVENT;
+            break;
+        case HIVIEW_LOG_TEXT_FILE:
+        case HIVIEW_LOG_BIN_FILE:
+            fp->outPath = HIVIEW_FILE_OUT_PATH_LOG;
+            break;
+        default:
+            break;
     }
 }
