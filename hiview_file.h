@@ -35,6 +35,18 @@ extern "C" {
 #define HIVIEW_STATIC_EVENT_VER            991231000       /* Static event version */
 #define HIVIEW_CONF_PRODUCT_VER_STR        "1.0.0"
 
+#ifndef FILE_PROC_DEFINED
+#define FILE_PROC_DEFINED
+/**
+ * Callback function prototype for file processing .
+ *
+ * @param path the path of the file to be processed.
+ * @param type the type of the file to be processed.
+ * @param event the type of event that triggered the function. 0 for file full.
+ **/
+typedef void (*FileProc)(const char *path, uint8 type, uint8 event);
+#endif
+
 typedef enum {
     HIVIEW_LOG_TEXT_FILE = 0,
     HIVIEW_LOG_BIN_FILE,
@@ -43,6 +55,15 @@ typedef enum {
     HIVIEW_UE_EVENT_FILE,
     HIVIEW_STAT_EVENT_FILE,
 } HiviewFileType;
+
+typedef enum {
+    HIVIEW_FILE_COPY = 0,
+    HIVIEW_FILE_RENAME
+} FileProcMode;
+
+typedef enum {
+    HIVIEW_FILE_FULL = 0
+} HiviewFileEvent;
 
 #pragma pack(1)
 typedef struct {
@@ -57,13 +78,15 @@ typedef struct {
     FileHeaderCommon common;
     uint32 createTime;
     uint32 wCursor;
-    uint32 usedSize;
+    uint32 rCursor;
     uint32 size;    /* Max size. Include the file header. */
 } HiviewFileHeader;
 
 typedef struct {
     HiviewFileHeader header;
     const char *path;
+    char *outPath;
+    FileProc pFunc;
     int32 fhandle;  /* Circular file */
     uint8 headerUpdateCtl;
 } HiviewFile;
@@ -140,6 +163,34 @@ uint32 GetFileFreeSize(HiviewFile *fp);
  * @return 0 if success, otherwise -1.
  **/
 int32 CloseHiviewFile(HiviewFile *fp);
+
+/**
+ * Process files according to mode.
+ *
+ * @param fp the pointer of hiview file object.
+ * @param dest target file path.
+ * @param mode file processing mode.
+ * @return 0 if success, otherwise -1.
+ **/
+int8 ProcFile(HiviewFile *fp, const char *dest, FileProcMode mode);
+
+/**
+ * Register a monitoring function when file is full .
+ *
+ * @param fp the pointer of file object.
+ * @param func callback function.
+ * @param dest target file path.
+ **/
+void RegisterFileWatcher(HiviewFile *fp, FileProc func, const char *dest);
+
+/**
+ * Unregister a monitoring function.
+ *
+ * @param fp the pointer of file object.
+ * @param func callback function.
+ * 
+ **/
+void UnRegisterFileWatcher(HiviewFile *fp, FileProc func);
 
 #ifdef __cplusplus
 #if __cplusplus

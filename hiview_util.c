@@ -92,12 +92,12 @@ void HIVIEW_Sleep(uint32 ms)
 /* Create the directory */
 int32 HIVIEW_FileMakeDir(const char *dir)
 {
-    return UtilsFileOpen(dir, O_CREAT_FS, O_RDWR_FS);
+    return UtilsFileOpen(dir, O_CREAT_FS, 0);
 }
 
 int32 HIVIEW_FileOpen(const char *path)
 {
-    return UtilsFileOpen(path, O_RDWR_FS | O_CREAT_FS, O_RDWR_FS);
+    return UtilsFileOpen(path, O_RDWR_FS | O_CREAT_FS, 0);
 }
 
 int32 HIVIEW_FileClose(int32 handle)
@@ -123,6 +123,16 @@ int32 HIVIEW_FileSeek(int32 handle, int32 offset, int32 whence)
 int32 HIVIEW_FileUnlink(const char *path)
 {
     return UtilsFileDelete(path);
+}
+
+int32 HIVIEW_FileCopy(const char *src, const char *dest)
+{
+    return UtilsFileCopy(src, dest);
+}
+
+int32 HIVIEW_FileMove(const char *src, const char *dest)
+{
+    return UtilsFileMove(src, dest);
 }
 
 void HIVIEW_WatchDogSystemReset()
