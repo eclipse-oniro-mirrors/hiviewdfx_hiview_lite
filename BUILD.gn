@@ -49,5 +49,16 @@ static_library("hiview_lite") {
     "LOG_OUTPUT_MODULE = $ohos_hiviewdfx_hiview_lite_output_module"
   ]
   public_configs = [":hiview_lite_config"]
-  deps = []
+
+  if (ohos_kernel_type == "liteos_m") {
+    cflags += [
+      "-nostdinc",
+      "-nostdlib"
+    ]
+    include_dirs = [
+      "//third_party/musl/porting/liteos_m/kernel/include",
+    ]
+  } else {
+    deps = []
+  }
 }
