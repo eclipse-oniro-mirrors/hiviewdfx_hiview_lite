@@ -16,6 +16,7 @@
 #ifndef HOS_LITE_HIVIEW_FILE_H
 #define HOS_LITE_HIVIEW_FILE_H
 
+#include "hiview_util.h"
 #include "ohos_types.h"
 
 #ifdef __cplusplus
@@ -87,6 +88,7 @@ typedef struct {
     const char *path;
     char *outPath;
     FileProc pFunc;
+    HiviewMutexId_t mutex;  /* file lock of outPath */
     int32 fhandle;  /* Circular file */
     uint8 headerUpdateCtl;
 } HiviewFile;

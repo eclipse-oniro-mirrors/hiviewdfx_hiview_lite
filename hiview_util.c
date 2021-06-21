@@ -66,11 +66,25 @@ HiviewMutexId_t HIVIEW_MutexInit()
 
 void HIVIEW_MutexLock(HiviewMutexId_t mutex)
 {
+    if (mutex == NULL) {
+        return;
+    }
     osMutexAcquire((osMutexId_t)mutex, HIVIEW_WAIT_FOREVER);
+}
+
+void HIVIEW_MutexLockOrWait(HiviewMutexId_t mutex, uint32 timeout)
+{
+    if (mutex == NULL) {
+        return;
+    }
+    osMutexAcquire((osMutexId_t)mutex, timeout);
 }
 
 void HIVIEW_MutexUnlock(HiviewMutexId_t mutex)
 {
+    if (mutex == NULL) {
+        return;
+    }
     osMutexRelease((osMutexId_t)mutex);
 }
 

@@ -63,6 +63,7 @@ void *HIVIEW_MemAlloc(uint8 modId, uint32 size);
 void HIVIEW_MemFree(uint8 modId, void *pMem);
 HiviewMutexId_t HIVIEW_MutexInit(void);
 void HIVIEW_MutexLock(HiviewMutexId_t mutex);
+void HIVIEW_MutexLockOrWait(HiviewMutexId_t mutex, uint32 timeout);
 void HIVIEW_MutexUnlock(HiviewMutexId_t mutex);
 uint32 HIVIEW_GetTaskId(void);
 void HIVIEW_UartPrint(const char *str);

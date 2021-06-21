@@ -255,11 +255,15 @@ int8 ProcFile(HiviewFile *fp, const char *dest, FileProcMode mode)
     if (fp == NULL || fp->fhandle < 0 || HIVIEW_FileClose(fp->fhandle) != 0) {
         return -1;
     }
+
+    HIVIEW_MutexLockOrWait(fp->mutex, OUT_PATH_WAIT_TIMEOUT);
     switch (mode) {
         case HIVIEW_FILE_COPY:
             if (HIVIEW_FileCopy(fp->path, dest) != 0) {
+                HIVIEW_MutexUnlock(fp->mutex);
                 return -1;
             }
+            HIVIEW_MutexUnlock(fp->mutex);
             fp->fhandle = HIVIEW_FileOpen(fp->path);
             if (fp->fhandle < 0) {
                 return -1;
@@ -269,13 +273,16 @@ int8 ProcFile(HiviewFile *fp, const char *dest, FileProcMode mode)
             uint8 type = fp->header.common.type;
             uint32 size = fp->header.size - sizeof(HiviewFileHeader);
             if (HIVIEW_FileMove(fp->path, dest) != 0 || InitHiviewFile(fp, type, size) == FALSE) {
+                HIVIEW_MutexUnlock(fp->mutex);
                 return -1;
             }
             break;
         }
         default:
+            HIVIEW_MutexUnlock(fp->mutex);
             return -1;
     }
+    HIVIEW_MutexUnlock(fp->mutex);
     return 0;
 }
 
