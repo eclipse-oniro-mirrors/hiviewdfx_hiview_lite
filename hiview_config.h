@@ -60,6 +60,8 @@ extern "C" {
 #define HIVIEW_FEATURE_ON                  1
 #define HIVIEW_FEATURE_OFF                 0
 
+#define OUT_PATH_WAIT_TIMEOUT              5               /* 5 seconds */
+
 #pragma pack(1)
 typedef struct {
     const uint8 outputOption : 4; /* Control log output mode. Cannot be modified during running. */
