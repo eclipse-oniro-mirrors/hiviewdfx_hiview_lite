@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "ohos_types.h"
 #include "ohos_init.h"
 #include "hiview_config.h"
 
