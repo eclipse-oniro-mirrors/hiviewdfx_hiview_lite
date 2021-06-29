@@ -57,6 +57,7 @@ static_library("hiview_lite") {
     ]
     include_dirs = [
       "//third_party/musl/porting/liteos_m/kernel/include",
+      "//utils/native/lite/include"
     ]
   } else {
     deps = []

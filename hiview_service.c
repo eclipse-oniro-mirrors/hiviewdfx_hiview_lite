@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "ohos_init.h"
 #include "samgr_lite.h"
 #include "service.h"
 #include "common.h"
