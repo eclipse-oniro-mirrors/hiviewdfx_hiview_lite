@@ -14,10 +14,16 @@
  */
 
 #include "hiview_util.h"
+
+#include <fcntl.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
+
 #include "cmsis_os.h"
 #include "utils_file.h"
 
@@ -28,6 +34,7 @@ extern void __enable_irq(void);
 #define HIVIEW_WAIT_FOREVER           0xFFFFFFFF
 #define HIVIEW_MS_PER_SECOND          1000
 #define HIVIEW_NS_PER_MILISECOND      1000000
+#define BUFFER_SIZE                   128
 
 void *HIVIEW_MemAlloc(uint8 modId, uint32 size)
 {
@@ -111,42 +118,83 @@ int32 HIVIEW_FileMakeDir(const char *dir)
 
 int32 HIVIEW_FileOpen(const char *path)
 {
-    return UtilsFileOpen(path, O_RDWR_FS | O_CREAT_FS, 0);
+    return open(path, O_RDWR | O_CREAT, 0);
 }
 
 int32 HIVIEW_FileClose(int32 handle)
 {
-    return UtilsFileClose(handle);
+    return close(handle);
 }
 
 int32 HIVIEW_FileRead(int32 handle, uint8 *buf, uint32 len)
 {
-    return UtilsFileRead(handle, (char *)buf, len);
+    return read(handle, (char *)buf, len);
 }
 
 int32 HIVIEW_FileWrite(int32 handle, const uint8 *buf, uint32 len)
 {
-    return UtilsFileWrite(handle, (const char *)buf, len);
+    return write(handle, (const char *)buf, len);
 }
 
 int32 HIVIEW_FileSeek(int32 handle, int32 offset, int32 whence)
 {
-    return UtilsFileSeek(handle, offset, whence);
+    return lseek(handle, offset, whence);
 }
 
 int32 HIVIEW_FileUnlink(const char *path)
 {
-    return UtilsFileDelete(path);
+    return unlink(path);
 }
 
 int32 HIVIEW_FileCopy(const char *src, const char *dest)
 {
-    return UtilsFileCopy(src, dest);
+    if (src == NULL || dest == NULL) {
+        return -1;
+    }
+    int32 fdSrc = open(src, O_RDONLY, 0);
+    if (fdSrc < 0) {
+        return fdSrc;
+    }
+    int32 fdDest = open(dest, O_RDWR | O_CREAT, 0);
+    if (fdDest < 0) {
+        HIVIEW_FileClose(fdSrc);
+        return fdDest;
+    }
+    boolean copyFailed = TRUE;
+    uint8 *dataBuf = (uint8 *)HIVIEW_MemAlloc(MEM_POOL_HIVIEW_ID, BUFFER_SIZE);
+    if (dataBuf == NULL) {
+        HIVIEW_UartPrint("HIVIEW_FileCopy malloc erro");
+        goto MALLOC_ERROR;
+    }
+    int32 nLen = HIVIEW_FileRead(fdSrc, dataBuf, BUFFER_SIZE);
+    while (nLen > 0) {
+        if (HIVIEW_FileWrite(fdDest, dataBuf, nLen) != nLen) {
+            goto EXIT;
+        }
+        nLen = HIVIEW_FileRead(fdSrc, dataBuf, BUFFER_SIZE);
+    }
+    copyFailed = (nLen < 0);
+
+EXIT:
+    free(dataBuf);
+MALLOC_ERROR:
+    HIVIEW_FileClose(fdSrc);
+    HIVIEW_FileClose(fdDest);
+    if (copyFailed) {
+        HIVIEW_FileUnlink(dest);
+        return -1;
+    }
+
+    return 0;
 }
 
 int32 HIVIEW_FileMove(const char *src, const char *dest)
 {
-    return UtilsFileMove(src, dest);
+    int32 ret = HIVIEW_FileCopy(src, dest);
+    if (ret == 0) {
+        ret = HIVIEW_FileUnlink(src);
+    }
+    return ret;
 }
 
 void HIVIEW_WatchDogSystemReset()
