@@ -70,7 +70,6 @@ void HIVIEW_UartPrint(const char *str);
 void HIVIEW_Sleep(uint32 ms);
 
 /* File system */
-int32 HIVIEW_FileMakeDir(const char *path);
 int32 HIVIEW_FileOpen(const char *path);
 int32 HIVIEW_FileClose(int32 handle);
 int32 HIVIEW_FileRead(int32 handle, uint8 *buf, uint32 len);
