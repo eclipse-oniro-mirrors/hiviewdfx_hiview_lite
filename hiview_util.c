@@ -25,7 +25,6 @@
 #include <unistd.h>
 
 #include "cmsis_os.h"
-#include "utils_file.h"
 
 extern void HAL_NVIC_SystemReset(void);
 extern void __disable_irq(void);
@@ -108,12 +107,6 @@ void HIVIEW_UartPrint(const char *str)
 void HIVIEW_Sleep(uint32 ms)
 {
     osDelay(ms / HIVIEW_MS_PER_SECOND);
-}
-
-/* Create the directory */
-int32 HIVIEW_FileMakeDir(const char *dir)
-{
-    return UtilsFileOpen(dir, O_CREAT_FS, 0);
 }
 
 int32 HIVIEW_FileOpen(const char *path)
