@@ -90,7 +90,6 @@ typedef struct {
     FileProc pFunc;
     HiviewMutexId_t mutex;  /* file lock of outPath */
     int32 fhandle;  /* Circular file */
-    uint8 headerUpdateCtl;
 } HiviewFile;
 #pragma pack()
 
