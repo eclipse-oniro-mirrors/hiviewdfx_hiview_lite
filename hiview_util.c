@@ -131,7 +131,7 @@ int32 HIVIEW_FileWrite(int32 handle, const uint8 *buf, uint32 len)
 
 int32 HIVIEW_FileSeek(int32 handle, int32 offset, int32 whence)
 {
-    return lseek(handle, offset, whence);
+    return lseek(handle, (off_t)offset, whence);
 }
 
 int32 HIVIEW_FileUnlink(const char *path)
@@ -148,7 +148,7 @@ int32 HIVIEW_FileCopy(const char *src, const char *dest)
     if (fdSrc < 0) {
         return fdSrc;
     }
-    int32 fdDest = open(dest, O_RDWR | O_CREAT, 0);
+    int32 fdDest = open(dest, O_RDWR | O_CREAT | O_TRUNC, 0);
     if (fdDest < 0) {
         HIVIEW_FileClose(fdSrc);
         return fdDest;
