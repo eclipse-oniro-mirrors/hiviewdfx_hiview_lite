@@ -26,20 +26,30 @@ extern "C" {
 #define __user
 #endif
 
-#define PATH_MAX_LEN            256
-#define EVENT_MAX_LEN           32
-#define MODULE_MAX_LEN          32
-#define ERROR_DESC_MAX_LEN      512
-#define MODULE_SYSTEM           "SYSTEM"
-#define EVENT_SYSREBOOT         "SYSREBOOT"
-#define EVENT_LONGPRESS         "LONGPRESS"
-#define EVENT_COMBINATIONKEY    "COMBINATIONKEY"
-#define EVENT_SUBSYSREBOOT      "SUBSYSREBOOT"
-#define EVENT_POWEROFF          "POWEROFF"
-#define EVENT_PANIC             "PANIC"
-#define EVENT_SYS_WATCHDOG      "SYSWATCHDOG"
-#define EVENT_HUNGTASK          "HUNGTASK"
-#define EVENT_BOOTFAIL          "BOOTFAIL"
+#include "hiview_log.h"
+
+#define ERROR_INFO_HEADER            "#### error info ####\r\n"
+#define ERROR_INFO_HEADER_FORMAT     "event: %s\r\nmodule: %s\r\nerrorDesc: %s\r\n"
+#define ERROR_INFO_MAX_LEN 768
+#define Min(a, b)                    (((a) > (b)) ? (b) : (a))
+#define BBOX_PRINT_ERR(format, ...)  HILOG_DEBUG(HILOG_MODULE_HIVIEW, "bbox: func: %s line: %d, Err: " \
+    format, __func__, __LINE__, ##__VA_ARGS__)
+#define BBOX_PRINT_INFO(format, ...) HILOG_DEBUG(HILOG_MODULE_HIVIEW, "bbox: Info: " format, ##__VA_ARGS__)
+
+#define PATH_MAX_LEN                 256
+#define EVENT_MAX_LEN                32
+#define MODULE_MAX_LEN               32
+#define ERROR_DESC_MAX_LEN           512
+#define MODULE_SYSTEM                "SYSTEM"
+#define EVENT_SYSREBOOT              "SYSREBOOT"
+#define EVENT_LONGPRESS              "LONGPRESS"
+#define EVENT_COMBINATIONKEY         "COMBINATIONKEY"
+#define EVENT_SUBSYSREBOOT           "SUBSYSREBOOT"
+#define EVENT_POWEROFF               "POWEROFF"
+#define EVENT_PANIC                  "PANIC"
+#define EVENT_SYS_WATCHDOG           "SYSWATCHDOG"
+#define EVENT_HUNGTASK               "HUNGTASK"
+#define EVENT_BOOTFAIL               "BOOTFAIL"
 
 struct ErrorInfo {
     char event[EVENT_MAX_LEN];

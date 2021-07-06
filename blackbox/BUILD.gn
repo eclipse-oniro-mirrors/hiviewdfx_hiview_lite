@@ -16,8 +16,8 @@ import("//build/lite/ndk/ndk.gni")
 static_library("blackbox") {
     sources = [
         "blackbox_core.c",
-        "blackbox_common.c",
         "blackbox_detector.c",
+        "blackbox_adapter.c",
     ]
     defines = []
     cflags = [ "-Wall" ]
@@ -28,25 +28,4 @@ static_library("blackbox") {
         "//base/hiviewdfx/hiview_lite",
         "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     ]
-    if (board_name == "hispark_pegasus") {
-        sources += [
-            "platform/hi3861/blackbox_system_adapter.c",
-        ]
-        defines += ["LOG_ROOT_PATH=\"/\""]
-        defines += ["FAULT_LOG_PATH=\"/kernel_fault.log\""]
-        defines += ["PLATFORM_HI3861"]
-        include_dirs += []
-    } else {
-        sources += [
-            "platform/bes2600/blackbox_system_adapter.c",
-        ]
-        include_dirs += [
-            "//kernel/liteos_m/kernel/include",
-            "//kernel/liteos_m/utils",
-            "//kernel/liteos_m/kernel/arch/include",
-            "//kernel/liteos_m/kal/posix/include",
-        ]
-        defines += ["LOG_ROOT_PATH=\"/data\""]
-        defines += ["FAULT_LOG_PATH=\"/data/kernel_fault.log\""]
-    }
 }

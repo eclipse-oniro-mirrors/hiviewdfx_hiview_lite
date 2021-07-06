@@ -15,7 +15,6 @@
 
 /*-----------includes---------*/
 #include "blackbox.h"
-#include "blackbox_common.h"
 #include "blackbox_detector.h"
 #include "ohos_types.h"
 #include "ohos_init.h"
@@ -23,31 +22,57 @@
 /*----------local macroes-----------*/
 /*----------global variables-----------*/
 /*----------function definitions-----------*/
-static void Dump(const char *logDir, struct ErrorInfo *info)
+WEAK void SystemModuleDump(const char *logDir, struct ErrorInfo *info)
 {
     (void)logDir;
     (void)info;
+    BBOX_PRINT_ERR("Please implement the interface according to the platform!\n");
 }
 
-static void Reset(struct ErrorInfo *info)
+WEAK void SystemModuleReset(struct ErrorInfo *info)
 {
     (void)info;
+    BBOX_PRINT_ERR("Please implement the interface according to the platform!\n");
 }
 
-static int GetLastLogInfo(struct ErrorInfo *info)
+WEAK int SystemModuleGetLastLogInfo(struct ErrorInfo *info)
 {
     (void)info;
+    BBOX_PRINT_ERR("Please implement the interface according to the platform!\n");
     return -1;
 }
 
-static int SaveLastLog(const char *logDir, struct ErrorInfo *info)
+WEAK int SystemModuleSaveLastLog(const char *logDir, struct ErrorInfo *info)
 {
     (void)logDir;
     (void)info;
+    BBOX_PRINT_ERR("Please implement the interface according to the platform!\n");
     return -1;
 }
 
-#ifndef BLACKBOX_TEST
+WEAK int FullWriteFile(const char *filePath, const char *buf,
+    size_t bufSize, int isAppend)
+{
+    (void)filePath;
+    (void)buf;
+    (void)bufSize;
+    (void)isAppend;
+    BBOX_PRINT_ERR("Please implement the interface according to the platform!\n");
+    return -1;
+}
+
+WEAK char *GetFaultLogPath(void)
+{
+    BBOX_PRINT_ERR("Please implement the interface according to the platform!\n");
+    return "";
+}
+
+WEAK void RebootSystem(void)
+{
+    BBOX_PRINT_ERR("Please implement the interface according to the platform!\n");
+}
+
+#ifdef BLACKBOX_TEST
 static void BBoxTest(void)
 {
     struct ModuleOps ops = {
@@ -66,22 +91,22 @@ static void BBoxTest(void)
 }
 #endif
 
-static void SystemAdapterInit(void)
+static void BBoxAdapterInit(void)
 {
     struct ModuleOps ops = {
         .module = MODULE_SYSTEM,
-        .Dump = Dump,
-        .Reset = Reset,
-        .GetLastLogInfo = GetLastLogInfo,
-        .SaveLastLog = SaveLastLog,
+        .Dump = SystemModuleDump,
+        .Reset = SystemModuleReset,
+        .GetLastLogInfo = SystemModuleGetLastLogInfo,
+        .SaveLastLog = SystemModuleSaveLastLog,
     };
 
     if (BBoxRegisterModuleOps(&ops) != 0) {
         BBOX_PRINT_ERR("BBoxRegisterModuleOps failed!\n");
         return;
     }
-#ifndef BLACKBOX_TEST
+#ifdef BLACKBOX_TEST
     BBoxTest();
 #endif
 }
-CORE_INIT_PRI(SystemAdapterInit, 2);
+CORE_INIT_PRI(BBoxAdapterInit, 2);

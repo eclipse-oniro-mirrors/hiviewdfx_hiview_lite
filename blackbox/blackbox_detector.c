@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "blackbox_common.h"
 #include "blackbox_detector.h"
 
 int UploadEventByFile(const char *filePath)
