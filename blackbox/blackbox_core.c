@@ -14,7 +14,7 @@
  */
 
 #include "blackbox.h"
-#include "blackbox_common.h"
+#include "blackbox_adapter.h"
 #include "blackbox_detector.h"
 #include "ohos_types.h"
 #include "ohos_init.h"
@@ -24,10 +24,6 @@
 #include <los_list.h>
 #include <los_sem.h>
 #include <los_task.h>
-#ifdef PLATFORM_HI3861
-#include <hi_reset.h>
-#endif
-#include "hiview_log.h"
 
 /******************local macroes*********************/
 #define LOG_ROOT_DIR_WAIT_TIME 1000
@@ -44,6 +40,25 @@ static LOS_DL_LIST_HEAD(g_opsList);
 static unsigned int g_opsListSem;
 
 /******************function definitions*******************/
+static void GetDirName(char *dirBuf, unsigned int dirBufSize, const char *path)
+{
+    if (dirBuf == NULL || dirBufSize == 0 || path == NULL) {
+        BBOX_PRINT_ERR("dirBuf: %p, dirBufSize: %u, path: %p!\n", dirBuf, dirBufSize, path);
+        return;
+    }
+
+    char *end = path + strlen(path);
+    while (*end != '/') {
+        end--;
+    }
+    if (end != NULL) {
+        (void)memset_s(dirBuf, dirBufSize, 0, dirBufSize);
+        (void)strncpy_s(dirBuf, dirBufSize - 1, path, end - path + strlen("/"));
+    } else {
+        BBOX_PRINT_ERR("no / has been found!\n");
+    }
+}
+
 static void FormatErrorInfo(struct ErrorInfo *info,
     const char event[EVENT_MAX_LEN],
     const char module[MODULE_MAX_LEN],
@@ -107,10 +122,11 @@ static void SaveBasicErrorInfo(const char *filePath, struct ErrorInfo *info)
         info->module, info->event);
 }
 
-static void* SaveLastLog(void *param)
+static void* SaveErrorLog(void *param)
 {
     struct ErrorInfo *info;
     struct BBoxOps *ops;
+    char dirName[PATH_MAX_LEN];
 
     info = malloc(sizeof(*info));
     if (info == NULL) {
@@ -118,7 +134,8 @@ static void* SaveLastLog(void *param)
         return NULL;
     }
 
-    WaitForLogRootDir(LOG_ROOT_PATH);
+    GetDirName(dirName, sizeof(dirName), GetFaultLogPath());
+    WaitForLogRootDir(dirName);
     if (LOS_SemPend(g_opsListSem, LOS_WAIT_FOREVER) != 0) {
         BBOX_PRINT_ERR("Request g_opsListSem failed!\n");
         free(info);
@@ -136,8 +153,13 @@ static void* SaveLastLog(void *param)
                     continue;
             }
             BBOX_PRINT_INFO("[%s] starts saving log!\n", ops->ops.module);
-            if (ops->ops.SaveLastLog(LOG_ROOT_PATH, info) != 0) {
+            if (ops->ops.SaveLastLog(dirName, info) != 0) {
                 BBOX_PRINT_ERR("[%s] failed to save log!\n", ops->ops.module);
+            } else {
+                BBOX_PRINT_INFO("[%s] ends saving log!\n", ops->ops.module);
+                BBOX_PRINT_INFO("[%s] starts uploading event [%s]\n", info->module, info->event);
+                (void)UploadEventByFile(GetFaultLogPath());
+                BBOX_PRINT_INFO("[%s] ends uploading event [%s]\n", info->module, info->event);
             }
         }
     }
@@ -216,6 +238,7 @@ int BBoxNotifyError(const char event[EVENT_MAX_LEN],
     int findModule = 0;
     struct BBoxOps *ops;
     struct ErrorInfo *info = NULL;
+    char dirName[PATH_MAX_LEN];
 
     info = malloc(sizeof(*info));
     if (info == NULL) {
@@ -223,8 +246,9 @@ int BBoxNotifyError(const char event[EVENT_MAX_LEN],
         return -1;
     }
 
+    GetDirName(dirName, sizeof(dirName), GetFaultLogPath());
     if (needSysReset == 0) {
-       WaitForLogRootDir(LOG_ROOT_PATH);
+       WaitForLogRootDir(dirName);
        if (LOS_SemPend(g_opsListSem, LOS_NO_WAIT) != 0) {
            BBOX_PRINT_ERR("Request g_opsListSem failed!\n");
            goto __out;
@@ -241,12 +265,12 @@ int BBoxNotifyError(const char event[EVENT_MAX_LEN],
         }
         FormatErrorInfo(info, event, module, errorDesc);
         if (ops->ops.Dump == NULL && ops->ops.Reset == NULL) {
-            SaveBasicErrorInfo(FAULT_LOG_PATH, info);
+            SaveBasicErrorInfo(GetFaultLogPath(), info);
             break;
         }
         if (ops->ops.Dump != NULL) {
             BBOX_PRINT_INFO("[%s] starts dumping data!\n", ops->ops.module);
-            ops->ops.Dump(LOG_ROOT_PATH, info);
+            ops->ops.Dump(dirName, info);
             BBOX_PRINT_INFO("[%s] ends dumping data!\n", ops->ops.module);
         }
         if (ops->ops.Reset != NULL) {
@@ -266,11 +290,7 @@ __out:
         free(info);
     }
     if (needSysReset != 0 && findModule != 0) {
-#ifdef PLATFORM_HI3861
-        hi_hard_reboot(HI_SYS_REBOOT_CAUSE_CMD);
-#else
-        LOS_Reboot();
-#endif
+        RebootSystem();
     }
 
     return 0;
@@ -286,9 +306,9 @@ static void BBoxInit(void)
         return;
     }
     LOS_ListInit(&g_opsList);
-    ret = pthread_create(&taskId, NULL, SaveLastLog, NULL);
+    ret = pthread_create(&taskId, NULL, SaveErrorLog, NULL);
     if (ret != 0) {
-        BBOX_PRINT_ERR("Falied to create SaveLastLog task, ret: %d\n", ret);
+        BBOX_PRINT_ERR("Falied to create SaveErrorLog task, ret: %d\n", ret);
     }
 }
 CORE_INIT_PRI(BBoxInit, 1);
