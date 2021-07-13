@@ -142,14 +142,17 @@ int32 HIVIEW_FileUnlink(const char *path)
 int32 HIVIEW_FileCopy(const char *src, const char *dest)
 {
     if (src == NULL || dest == NULL) {
+        HIVIEW_UartPrint("HIVIEW_FileCopy input param is NULL");
         return -1;
     }
     int32 fdSrc = open(src, O_RDONLY, 0);
     if (fdSrc < 0) {
+        HIVIEW_UartPrint("HIVIEW_FileCopy open src file fail");
         return fdSrc;
     }
     int32 fdDest = open(dest, O_RDWR | O_CREAT | O_TRUNC, 0);
     if (fdDest < 0) {
+        HIVIEW_UartPrint("HIVIEW_FileCopy open dest file fail");
         HIVIEW_FileClose(fdSrc);
         return fdDest;
     }
@@ -174,6 +177,7 @@ MALLOC_ERROR:
     HIVIEW_FileClose(fdSrc);
     HIVIEW_FileClose(fdDest);
     if (copyFailed) {
+        HIVIEW_UartPrint("HIVIEW_FileCopy copy failed");
         HIVIEW_FileUnlink(dest);
         return -1;
     }
@@ -184,10 +188,10 @@ MALLOC_ERROR:
 int32 HIVIEW_FileMove(const char *src, const char *dest)
 {
     int32 ret = HIVIEW_FileCopy(src, dest);
-    if (ret == 0) {
-        ret = HIVIEW_FileUnlink(src);
+    if (HIVIEW_FileUnlink(src) != 0 || ret != 0) {
+        return -1;
     }
-    return ret;
+    return 0;
 }
 
 void HIVIEW_WatchDogSystemReset()
