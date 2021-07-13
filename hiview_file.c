@@ -20,9 +20,6 @@
 #include "ohos_types.h"
 #include "securec.h"
 
-/* Refresh the file header information after every 10 file operations. */
-#define FILE_HEADER_UPDATE_CTL   10
-
 static uint16 GetReadCursor(HiviewFile *fp);
 
 static uint32 GetDefineFileVersion(uint8 type)
@@ -51,7 +48,6 @@ boolean InitHiviewFile(HiviewFile *fp, HiviewFileType type, uint32 size)
         return FALSE;
     }
 
-    fp->headerUpdateCtl = 0;
     HiviewFileHeader *pHeader = &(fp->header);
     FileHeaderCommon *pCommon = &(pHeader->common);
     pCommon->type = (uint8)type;
@@ -166,13 +162,8 @@ int32 WriteToFile(HiviewFile *fp, const uint8 *data, uint32 len)
         h->wCursor += len;
         wLen += len;
     }
-    if (fp->headerUpdateCtl >= FILE_HEADER_UPDATE_CTL) {
-        fp->headerUpdateCtl = 0;
-        if (WriteFileHeader(fp) == FALSE) {
-            return 0;
-        }
-    } else {
-        fp->headerUpdateCtl++;
+    if (WriteFileHeader(fp) == FALSE) {
+        return 0;
     }
     return wLen;
 }
@@ -198,13 +189,8 @@ int32 ReadFromFile(HiviewFile *fp, uint8 *data, uint32 readLen)
     } else {
         rLen = 0;
     }
-    if (fp->headerUpdateCtl >= FILE_HEADER_UPDATE_CTL) {
-        fp->headerUpdateCtl = 0;
-        if (WriteFileHeader(fp) == FALSE) {
-            return 0;
-        }
-    } else {
-        fp->headerUpdateCtl++;
+    if (WriteFileHeader(fp) == FALSE) {
+        return 0;
     }
     return rLen;
 }
