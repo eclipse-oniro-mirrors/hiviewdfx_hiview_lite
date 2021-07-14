@@ -148,9 +148,7 @@ int32 WriteToFile(HiviewFile *fp, const uint8 *data, uint32 len)
     HiviewFileHeader *h = &(fp->header);
     // overflow
     if (h->wCursor + len > h->size) {
-        if (ProcFile(fp, fp->outPath, HIVIEW_FILE_RENAME) != 0) {
-            return 0;
-        }
+        ProcFile(fp, fp->outPath, HIVIEW_FILE_RENAME);
         if (fp->pFunc != NULL) {
             fp->pFunc(fp->outPath, h->common.type, HIVIEW_FILE_FULL);
         }
@@ -244,28 +242,30 @@ int8 ProcFile(HiviewFile *fp, const char *dest, FileProcMode mode)
 
     HIVIEW_MutexLockOrWait(fp->mutex, OUT_PATH_WAIT_TIMEOUT);
     switch (mode) {
-        case HIVIEW_FILE_COPY:
-            if (HIVIEW_FileCopy(fp->path, dest) != 0) {
-                HIVIEW_MutexUnlock(fp->mutex);
-                return -1;
-            }
-            HIVIEW_MutexUnlock(fp->mutex);
+        case HIVIEW_FILE_COPY:{
+            int32 ret = HIVIEW_FileCopy(fp->path, dest);
             fp->fhandle = HIVIEW_FileOpen(fp->path);
-            if (fp->fhandle < 0) {
+            if (ret != 0 || fp->fhandle < 0) {
+                HIVIEW_MutexUnlock(fp->mutex);
+                HIVIEW_UartPrint("Procfile failed, type : HIVIEW_FILE_COPY");
                 return -1;
             }
             break;
+        }
         case HIVIEW_FILE_RENAME: {
             uint8 type = fp->header.common.type;
             uint32 size = fp->header.size - sizeof(HiviewFileHeader);
-            if (HIVIEW_FileMove(fp->path, dest) != 0 || InitHiviewFile(fp, type, size) == FALSE) {
+            int32 ret = HIVIEW_FileMove(fp->path, dest);
+            if (InitHiviewFile(fp, type, size) == FALSE || ret != 0) {
                 HIVIEW_MutexUnlock(fp->mutex);
+                HIVIEW_UartPrint("Procfile failed, type : HIVIEW_FILE_RENAME");
                 return -1;
             }
             break;
         }
         default:
             HIVIEW_MutexUnlock(fp->mutex);
+            HIVIEW_UartPrint("Procfile failed, type : Unknown type");
             return -1;
     }
     HIVIEW_MutexUnlock(fp->mutex);
