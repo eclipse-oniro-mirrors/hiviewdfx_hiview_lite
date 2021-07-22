@@ -146,7 +146,7 @@ static void* SaveErrorLog(void *param)
             continue;
         }
         if (ops->ops.GetLastLogInfo != NULL && ops->ops.SaveLastLog != NULL) {
-            memset(info, 0, sizeof(*info));
+            (void)memset_s(info, sizeof(*info), 0, sizeof(*info));
             if (ops->ops.GetLastLogInfo(info) != 0) {
                 BBOX_PRINT_ERR("[%s] failed to get log info!\n",
                     ops->ops.module);
