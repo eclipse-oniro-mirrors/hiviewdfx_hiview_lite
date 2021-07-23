@@ -29,6 +29,10 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef WEAK
+#define WEAK __attribute__((weak))
+#endif
+
 extern int DumpSysInfo(void);
 extern int DumpCpuUsage(void);
 extern int DumpMemUsage(void);

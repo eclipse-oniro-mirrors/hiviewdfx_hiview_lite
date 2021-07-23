@@ -16,27 +16,38 @@
 #include "blackbox.h"
 #include "blackbox_adapter.h"
 #include "blackbox_detector.h"
-#include "ohos_types.h"
 #include "ohos_init.h"
+#include "ohos_types.h"
+#include "pthread.h"
 #include "securec.h"
-#include <memory.h>
-#include <pthread.h>
-#include <los_list.h>
-#include <los_sem.h>
-#include <los_task.h>
+#include "utils_list.h"
 
 /******************local macroes*********************/
-#define LOG_ROOT_DIR_WAIT_TIME 1000
+#define LOG_ROOT_DIR_WAIT_TIME  1000
 #define LOG_ROOT_DIR_WAIT_COUNT 1
+#ifndef LOS_WAIT_FOREVER
+#define LOS_WAIT_FOREVER        0xFFFFFFFF
+#endif
+#ifndef LOS_NO_WAIT
+#define LOS_NO_WAIT             0
+#endif
+#ifndef LOS_OK
+#define LOS_OK                  0
+#endif
 
 /******************local prototypes******************/
 struct BBoxOps {
-    LOS_DL_LIST opsList;
+    UTILS_DL_LIST opsList;
     struct ModuleOps ops;
 };
 
+/******************global functions*******************/
+extern unsigned int LOS_BinarySemCreate(unsigned short count, unsigned int *semHandle);
+extern unsigned int LOS_SemPend(unsigned int semHandle, unsigned int timeout);
+extern unsigned int LOS_SemPost(unsigned int semHandle);
+
 /******************local variables*******************/
-static LOS_DL_LIST_HEAD(g_opsList);
+static UTILS_DL_LIST_HEAD(g_opsList);
 static unsigned int g_opsListSem;
 
 /******************function definitions*******************/
@@ -141,7 +152,7 @@ static void* SaveErrorLog(void *param)
         free(info);
         return NULL;
     }
-    LOS_DL_LIST_FOR_EACH_ENTRY(ops, &g_opsList, struct BBoxOps, opsList) {
+    UTILS_DL_LIST_FOR_EACH_ENTRY(ops, &g_opsList, struct BBoxOps, opsList) {
         if (ops == NULL) {
             continue;
         }
@@ -175,7 +186,7 @@ static void PrintModuleOps(void)
     struct BBoxOps *temp;
 
     BBOX_PRINT_INFO("The following modules have been registered!\n");
-    LOS_DL_LIST_FOR_EACH_ENTRY(temp, &g_opsList, struct BBoxOps, opsList) {
+    UTILS_DL_LIST_FOR_EACH_ENTRY(temp, &g_opsList, struct BBoxOps, opsList) {
         BBOX_PRINT_INFO("module: %s, Dump: %p, Reset: %p, "
             "GetLastLogInfo: %p, SaveLastLog: %p\n",
             temp->ops.module, temp->ops.Dump, temp->ops.Reset,
@@ -207,10 +218,10 @@ int BBoxRegisterModuleOps(struct ModuleOps *ops)
         free(newOps);
         return -1;
     }
-    if (LOS_ListEmpty(&g_opsList)) {
+    if (UtilsListEmpty(&g_opsList)) {
         goto __out;
     }
-    LOS_DL_LIST_FOR_EACH_ENTRY(temp, &g_opsList, struct BBoxOps, opsList) {
+    UTILS_DL_LIST_FOR_EACH_ENTRY(temp, &g_opsList, struct BBoxOps, opsList) {
         if (strcmp(temp->ops.module, ops->module) == 0) {
             BBOX_PRINT_ERR("[%s] has been registered!\n", ops->module);
             (void)LOS_SemPost(g_opsListSem);
@@ -221,7 +232,7 @@ int BBoxRegisterModuleOps(struct ModuleOps *ops)
 
 __out:
     BBOX_PRINT_INFO("[%s] is registered successfully!\n", ops->module);
-    LOS_ListTailInsert(&g_opsList, &newOps->opsList);
+    UtilsListTailInsert(&g_opsList, &newOps->opsList);
     (void)LOS_SemPost(g_opsListSem);
 #ifdef BLACKBOX_DEBUG
     PrintModuleOps();
@@ -255,7 +266,7 @@ int BBoxNotifyError(const char event[EVENT_MAX_LEN],
        }
     }
 
-    LOS_DL_LIST_FOR_EACH_ENTRY(ops, &g_opsList, struct BBoxOps, opsList) {
+    UTILS_DL_LIST_FOR_EACH_ENTRY(ops, &g_opsList, struct BBoxOps, opsList) {
         if (ops == NULL) {
             BBOX_PRINT_ERR("ops: %p!\n", ops);
             continue;
@@ -305,7 +316,7 @@ static void BBoxInit(void)
         BBOX_PRINT_ERR("Create binary semaphore failed!\n");
         return;
     }
-    LOS_ListInit(&g_opsList);
+    UtilsListInit(&g_opsList);
     ret = pthread_create(&taskId, NULL, SaveErrorLog, NULL);
     if (ret != 0) {
         BBOX_PRINT_ERR("Falied to create SaveErrorLog task, ret: %d\n", ret);
