@@ -24,10 +24,10 @@ int UploadEventByFile(const char *filePath)
     return 0;
 }
 
-int UploadEventByStream(const char *buf, size_t bufSize)
+int UploadEventByStream(const char *buf, unsigned int bufSize)
 {
     if (buf == NULL || bufSize == 0) {
-        BBOX_PRINT_ERR("buf: %p, bufSize: %u\n", buf, (UINT32)bufSize);
+        BBOX_PRINT_ERR("buf: %p, bufSize: %u\n", buf, bufSize);
         return -1;
     }
     return 0;

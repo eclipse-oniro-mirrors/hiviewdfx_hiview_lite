@@ -17,9 +17,8 @@
 #define BLACKBOX_DETECTOR_H
 
 #include "blackbox.h"
-#include "los_typedef.h"
 
 int UploadEventByFile(const char *filePath);
-int UploadEventByStream(const char *buf, size_t bufSize);
+int UploadEventByStream(const char *buf, unsigned int bufSize);
 
 #endif // BLACKBOX_DETECTOR_H
