@@ -15,8 +15,8 @@
 
 /*-----------includes---------*/
 #include "blackbox.h"
+#include "blackbox_adapter.h"
 #include "blackbox_detector.h"
-#include "ohos_types.h"
 #include "ohos_init.h"
 
 /*----------local macroes-----------*/
@@ -51,7 +51,7 @@ WEAK int SystemModuleSaveLastLog(const char *logDir, struct ErrorInfo *info)
 }
 
 WEAK int FullWriteFile(const char *filePath, const char *buf,
-    size_t bufSize, int isAppend)
+    unsigned int bufSize, int isAppend)
 {
     (void)filePath;
     (void)buf;

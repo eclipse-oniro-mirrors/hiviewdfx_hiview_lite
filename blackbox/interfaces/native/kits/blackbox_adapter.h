@@ -29,11 +29,15 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef WEAK
+#define WEAK __attribute__((weak))
+#endif
+
 extern void SystemModuleDump(const char *logDir, struct ErrorInfo *info);
 extern void SystemModuleReset(struct ErrorInfo *info);
 extern int SystemModuleGetLastLogInfo(struct ErrorInfo *info);
 extern int SystemModuleSaveLastLog(const char *logDir, struct ErrorInfo *info);
-extern int FullWriteFile(const char *filePath, const char *buf, size_t bufSize, int isAppend);
+extern int FullWriteFile(const char *filePath, const char *buf, unsigned int bufSize, int isAppend);
 extern char *GetFaultLogPath(void);
 extern void RebootSystem(void);
 
