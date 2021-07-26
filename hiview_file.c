@@ -130,7 +130,7 @@ boolean ReadFileHeader(HiviewFile *fp)
     h.common.defineFileVersion = Change32Endian(h.common.defineFileVersion);
     h.createTime = Change32Endian(h.createTime);
 #endif
-    if ((ret == sizeof(HiviewFileHeader)) && (h.createTime < t) &&
+    if ((ret == sizeof(HiviewFileHeader)) &&
         ((h.common.prefix & 0xFFFFFF00) == HIVIEW_FILE_HEADER_PREFIX_MASK)) {
         memcpy_s(&(fp->header), sizeof(HiviewFileHeader), (void *)&h, sizeof(HiviewFileHeader));
         return TRUE;
