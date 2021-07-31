@@ -66,7 +66,7 @@ static void ExecAction(int fd, unsigned int cmd)
 
     int ret = ioctl(fd, cmd, NULL);
     if (ret < 0) {
-        printf("Failed to ioctl [%s], error [%s]\n", cmd, strerror(errno));
+        printf("Failed to ioctl [%u], error [%s]\n", cmd, strerror(errno));
     }
 }
 
