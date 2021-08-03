@@ -42,10 +42,6 @@ struct BBoxOps {
 };
 
 /******************global functions*******************/
-extern unsigned int LOS_BinarySemCreate(unsigned short count, unsigned int *semHandle);
-extern unsigned int LOS_SemPend(unsigned int semHandle, unsigned int timeout);
-extern unsigned int LOS_SemPost(unsigned int semHandle);
-
 /******************local variables*******************/
 static UTILS_DL_LIST_HEAD(g_opsList);
 static unsigned int g_opsListSem;
@@ -59,12 +55,14 @@ static void GetDirName(char *dirBuf, unsigned int dirBufSize, const char *path)
     }
 
     char *end = path + strlen(path);
-    while (*end != '/') {
+    while (*end != '/' && end >= path) {
         end--;
     }
-    if (end != NULL) {
+    if (end >= path) {
         (void)memset_s(dirBuf, dirBufSize, 0, dirBufSize);
-        (void)strncpy_s(dirBuf, dirBufSize - 1, path, end - path + strlen("/"));
+        if (strncpy_s(dirBuf, dirBufSize - 1, path, end - path + strlen("/")) != EOK) {
+            BBOX_PRINT_ERR("strncpy_s failed or the dirBuf is not enough!\n");
+        }
     } else {
         BBOX_PRINT_ERR("no / has been found!\n");
     }
@@ -82,12 +80,18 @@ static void FormatErrorInfo(struct ErrorInfo *info,
     }
 
     (void)memset_s(info, sizeof(*info), 0, sizeof(*info));
-    strncpy_s(info->event, sizeof(info->event), event,
-        Min(strlen(event), sizeof(info->event) - 1));
-    strncpy_s(info->module, sizeof(info->module), module,
-        Min(strlen(module), sizeof(info->module) - 1));
-    strncpy_s(info->errorDesc, sizeof(info->errorDesc), errorDesc,
-        Min(strlen(errorDesc), sizeof(info->errorDesc) - 1));
+    if (strncpy_s(info->event, sizeof(info->event), event,
+        Min(strlen(event), sizeof(info->event) - 1)) != EOK) {
+        BBOX_PRINT_ERR("strncpy_s failed or the info->event is not enough!\n");
+    }
+    if (strncpy_s(info->module, sizeof(info->module), module,
+        Min(strlen(module), sizeof(info->module) - 1)) != EOK) {
+        BBOX_PRINT_ERR("strncpy_s failed or the info->module is not enough!\n");
+    }
+    if (strncpy_s(info->errorDesc, sizeof(info->errorDesc), errorDesc,
+        Min(strlen(errorDesc), sizeof(info->errorDesc) - 1)) != EOK) {
+        BBOX_PRINT_ERR("strncpy_s failed or the info->errorDesc is not enough!\n");
+    }
 }
 
 static void WaitForLogRootDir(const char *rootDir)
@@ -107,7 +111,7 @@ static void WaitForLogRootDir(const char *rootDir)
 
 static void SaveBasicErrorInfo(const char *filePath, struct ErrorInfo *info)
 {
-    char *buf;
+    char *buf = NULL;
 
     if (filePath == NULL || info == NULL) {
         BBOX_PRINT_ERR("filePath: %p, info: %p!\n", filePath, info);
@@ -120,11 +124,14 @@ static void SaveBasicErrorInfo(const char *filePath, struct ErrorInfo *info)
         return;
     }
     (void)memset_s(buf, ERROR_INFO_MAX_LEN, 0, ERROR_INFO_MAX_LEN);
-    (void)snprintf_s(buf, ERROR_INFO_MAX_LEN, ERROR_INFO_MAX_LEN - 1,
+    if (snprintf_s(buf, ERROR_INFO_MAX_LEN, ERROR_INFO_MAX_LEN - 1,
         ERROR_INFO_HEADER ERROR_INFO_HEADER_FORMAT,
-        info->event, info->module, info->errorDesc);
-    *(buf + ERROR_INFO_MAX_LEN - 1) = '\0';
-    (void)FullWriteFile(filePath, buf, strlen(buf), 0);
+        info->event, info->module, info->errorDesc) != -1) {
+        *(buf + ERROR_INFO_MAX_LEN - 1) = '\0';
+        (void)FullWriteFile(filePath, buf, strlen(buf), 0);
+    } else {
+        PRINT_ERR("buf is not enough or snprintf_s failed\n");
+    }
     free(buf);
     BBOX_PRINT_INFO("[%s] starts uploading event [%s]\n",
         info->module, info->event);
@@ -135,9 +142,9 @@ static void SaveBasicErrorInfo(const char *filePath, struct ErrorInfo *info)
 
 static void* SaveErrorLog(void *param)
 {
-    struct ErrorInfo *info;
-    struct BBoxOps *ops;
-    char dirName[PATH_MAX_LEN];
+    struct ErrorInfo *info = NULL;
+    struct BBoxOps *ops = NULL;
+    char dirName[PATH_MAX_LEN] = { 0 };
 
     info = malloc(sizeof(*info));
     if (info == NULL) {
@@ -183,7 +190,7 @@ static void* SaveErrorLog(void *param)
 #ifdef BLACKBOX_DEBUG
 static void PrintModuleOps(void)
 {
-    struct BBoxOps *temp;
+    struct BBoxOps *temp = NULL;
 
     BBOX_PRINT_INFO("The following modules have been registered!\n");
     UTILS_DL_LIST_FOR_EACH_ENTRY(temp, &g_opsList, struct BBoxOps, opsList) {
@@ -197,8 +204,8 @@ static void PrintModuleOps(void)
 
 int BBoxRegisterModuleOps(struct ModuleOps *ops)
 {
-    struct BBoxOps *newOps;
-    struct BBoxOps *temp;
+    struct BBoxOps *newOps = NULL;
+    struct BBoxOps *temp = NULL;
 
     if (ops == NULL) {
         BBOX_PRINT_ERR("ops: %p!\n", ops);
@@ -247,9 +254,9 @@ int BBoxNotifyError(const char event[EVENT_MAX_LEN],
     int needSysReset)
 {
     int findModule = 0;
-    struct BBoxOps *ops;
+    struct BBoxOps *ops = NULL;
     struct ErrorInfo *info = NULL;
-    char dirName[PATH_MAX_LEN];
+    char dirName[PATH_MAX_LEN] = { 0 };
 
     info = malloc(sizeof(*info));
     if (info == NULL) {
