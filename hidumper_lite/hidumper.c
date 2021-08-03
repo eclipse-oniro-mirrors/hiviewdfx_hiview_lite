@@ -157,7 +157,11 @@ int main(int argc, char *argv[])
         DumpMemData(fd, &param);
     } else if (argc == 3 && strcmp(argv[1], "-m") == 0) {
         param.type = DUMP_TO_FILE;
-        (void)strncpy_s(param.filePath, sizeof(param.filePath), argv[2], sizeof(param.filePath) - 1);
+        if (strncpy_s(param.filePath, sizeof(param.filePath), argv[2], sizeof(param.filePath) - 1) != EOK) {
+            printf("param.filePath is not enough or strncpy_s failed\n");
+            close(fd);
+            return -1;
+        }
         DumpMemData(fd, &param);
     } else if (argc == 4 && strcmp(argv[1], "-m") == 0) {
         param.type = DUMP_TO_STDOUT;
@@ -168,7 +172,11 @@ int main(int argc, char *argv[])
         param.type = DUMP_TO_FILE;
         param.start = strtoull(argv[2], NULL, 16);
         param.size = strtoull(argv[3], NULL, 16);
-        (void)strncpy_s(param.filePath, sizeof(param.filePath), argv[4], sizeof(param.filePath) - 1);
+        if (strncpy_s(param.filePath, sizeof(param.filePath), argv[4], sizeof(param.filePath) - 1) != EOK) {
+            printf("param.filePath is not enough or strncpy_s failed\n");
+            close(fd);
+            return -1;
+        }
         DumpMemData(fd, &param);
     } else {
         Usage();
