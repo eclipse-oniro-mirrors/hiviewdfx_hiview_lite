@@ -33,6 +33,7 @@ extern "C" {
 #define WEAK __attribute__((weak))
 #endif
 
+/* The following functions need to be implemented by yourself */
 extern void SystemModuleDump(const char *logDir, struct ErrorInfo *info);
 extern void SystemModuleReset(struct ErrorInfo *info);
 extern int SystemModuleGetLastLogInfo(struct ErrorInfo *info);
@@ -40,6 +41,11 @@ extern int SystemModuleSaveLastLog(const char *logDir, struct ErrorInfo *info);
 extern int FullWriteFile(const char *filePath, const char *buf, unsigned int bufSize, int isAppend);
 extern char *GetFaultLogPath(void);
 extern void RebootSystem(void);
+
+/* The following functions have been implemented in the kernel */
+extern unsigned int LOS_BinarySemCreate(unsigned short count, unsigned int *semHandle);
+extern unsigned int LOS_SemPend(unsigned int semHandle, unsigned int timeout);
+extern unsigned int LOS_SemPost(unsigned int semHandle);
 
 #ifdef __cplusplus
 #if __cplusplus
