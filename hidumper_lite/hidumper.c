@@ -107,15 +107,26 @@ static void DumpTaskInfo(int fd)
 
 static void DumpMemData(int fd, struct MemDumpParam *param)
 {
+#ifdef OHOS_DEBUG
     int ret = ioctl(fd, HIDUMPER_MEM_DATA, param);
     if (ret < 0) {
         printf("Failed to ioctl [%s], error [%s]\n", HIDUMPER_DEVICE, strerror(errno));
     }
+#else
+    (void)fd;
+    (void)param;
+    printf("Unsupported!\n");
+#endif
 }
 
 static void InjectKernelCrash(int fd)
 {
+#ifdef OHOS_DEBUG
     ExecAction(fd, HIDUMPER_INJECT_KERNEL_CRASH);
+#else
+    (void)fd;
+    printf("Unsupported!\n");
+#endif
 }
 
 static void DumpFaultLog(int fd)
@@ -125,7 +136,11 @@ static void DumpFaultLog(int fd)
 
 static void InjectUserCrash(void)
 {
+#ifdef OHOS_DEBUG
     *((int *)USER_FAULT_ADDR) = USER_FAULT_VALUE;
+#else
+    printf("Unsupported!\n");
+#endif
 }
 
 int main(int argc, char *argv[])
