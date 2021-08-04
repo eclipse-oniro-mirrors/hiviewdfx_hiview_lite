@@ -16,6 +16,12 @@
 #ifndef HIDUMPER_H
 #define HIDUMPER_H
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif /* End of #if __cplusplus */
+#endif /* End of #ifdef __cplusplus */
+
 struct HiDumperAdapter {
     int (*DumpSysInfo)(void);
     int (*DumpCpuUsage)(void);
@@ -29,4 +35,10 @@ struct HiDumperAdapter {
 int HiDumperRegisterAdapter(struct HiDumperAdapter *pAdapter);
 unsigned int at_hidumper(unsigned int argc, const char **argv);
 
-#endif
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* End of #if __cplusplus */
+#endif /* End of #ifdef __cplusplus */
+
+#endif /* End of #ifndef HIDUMPER_H */
