@@ -289,7 +289,7 @@ int IsValidPath(const char *path)
 
 void RegisterFileWatcher(HiviewFile *fp, FileProc func, const char *path)
 {
-    if (fp == NULL) {
+    if (fp == NULL || func == NULL || path == NULL) {
         return;
     }
     fp->pFunc = func;
