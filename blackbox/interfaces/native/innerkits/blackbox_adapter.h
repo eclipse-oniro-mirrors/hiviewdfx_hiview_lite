@@ -16,18 +16,14 @@
 #ifndef BLACKBOX_ADAPTER_H
 #define BLACKBOX_ADAPTER_H
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif //__cplusplus
-#endif //__cplusplus
-
-#ifndef __user
-#define __user
-#endif
-
-#include <stdio.h>
-#include <stdlib.h>
+#endif /* End of #if __cplusplus */
+#endif /* End of #ifdef __cplusplus */
 
 #ifndef WEAK
 #define WEAK __attribute__((weak))
@@ -50,7 +46,7 @@ extern unsigned int LOS_SemPost(unsigned int semHandle);
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif //__cplusplus
-#endif //__cplusplus
+#endif /* End of #if __cplusplus */
+#endif /* End of #ifdef __cplusplus */
 
-#endif // BLACKBOX_ADAPTER_H
+#endif /* End of #ifndef BLACKBOX_ADAPTER_H */
