@@ -71,7 +71,7 @@ static void InjectKernelCrash(void)
     int *ptr = (int *)FAULT_ADDR;
     *ptr = FAULT_VALUE;
 #else
-    printf("Fault inject isn't supported in release version!\n");
+    printf("Unsupported!\n");
 #endif
 }
 
@@ -128,20 +128,20 @@ unsigned int at_hidumper(unsigned int argc, const char **argv)
 #ifdef OHOS_DEBUG
             g_hidumperAdapter.DumpAllMem();
 #else
-            printf("mem dump isn't supported in release version!\n");
+            printf("Unsupported!\n");
 #endif
         } else {
             Usage();
         }
     } else if (argc == 2 && strcmp(argv[0], "-m") == 0) {
-        printf("Unsupported!\r\n");
+        printf("Unsupported!\n");
     } else if (argc == 3) {
         if (strcmp(argv[0], "-m") == 0) {
 #ifdef OHOS_DEBUG
             g_hidumperAdapter.DumpMemRegion(strtoull(argv[1], NULL, 16),
                 strtoull(argv[2], NULL, 16));
 #else
-            printf("mem dump isn't supported in release version!\n");
+            printf("Unsupported!\n");
 #endif
         } else {
             Usage();
