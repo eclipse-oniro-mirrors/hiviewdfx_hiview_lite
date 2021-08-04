@@ -16,17 +16,13 @@
 #ifndef BLACKBOX_H
 #define BLACKBOX_H
 
+#include "hiview_log.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif //__cplusplus
-#endif //__cplusplus
-
-#ifndef __user
-#define __user
-#endif
-
-#include "hiview_log.h"
+#endif /* End of #if __cplusplus */
+#endif /* End of #ifdef __cplusplus */
 
 #define ERROR_INFO_HEADER            "#### error info ####\r\n"
 #define ERROR_INFO_HEADER_FORMAT     "event: %s\r\nmodule: %s\r\nerrorDesc: %s\r\n"
@@ -75,7 +71,7 @@ int BBoxDriverInit(void);
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif //__cplusplus
-#endif //__cplusplus
+#endif /* End of #if __cplusplus */
+#endif /* End of #ifdef __cplusplus */
 
-#endif 
+#endif /* End of #ifndef BLACKBOX_H */
