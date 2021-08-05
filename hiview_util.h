@@ -43,6 +43,9 @@ extern "C" {
 #define LITTLE_ENDIAN_SYSTEM 1
 #endif
 
+#define OPTION_MASK 0x07
+#define GETOPTION(opt) ((opt) & OPTION_MASK)
+
 typedef void *HiviewMutexId_t;
 
 typedef struct {
