@@ -78,7 +78,7 @@ int32 HIVIEW_FileClose(int32 handle);
 int32 HIVIEW_FileRead(int32 handle, uint8 *buf, uint32 len);
 int32 HIVIEW_FileWrite(int32 handle, const uint8 *buf, uint32 len);
 int32 HIVIEW_FileSeek(int32 handle, int32 offset, int32 whence);
-int32 HIVIEW_FileSize(const char *path);
+int32 HIVIEW_FileSize(int32 handle);
 int32 HIVIEW_FileUnlink(const char *path);
 int32 HIVIEW_FileCopy(const char *src, const char *dest);
 int32 HIVIEW_FileMove(const char *src, const char *dest);
