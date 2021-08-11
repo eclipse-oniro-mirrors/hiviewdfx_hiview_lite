@@ -80,6 +80,7 @@ typedef enum {
     OUTPUT_OPTION_FLOW,         /* Output to UART via SAMR */
     OUTPUT_OPTION_TEXT_FILE,
     OUTPUT_OPTION_BIN_FILE,
+    OUTPUT_OPTION_PRINT = 8,
     OUTPUT_OPTION_MAX
 } HiviewOutputOption;
 

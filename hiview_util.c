@@ -134,6 +134,11 @@ int32 HIVIEW_FileSeek(int32 handle, int32 offset, int32 whence)
     return lseek(handle, (off_t)offset, whence);
 }
 
+int32 HIVIEW_FileSize(int32 handle)
+{
+    return lseek(handle, 0, SEEK_END);
+}
+
 int32 HIVIEW_FileUnlink(const char *path)
 {
     return unlink(path);
