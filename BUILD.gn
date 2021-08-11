@@ -64,9 +64,6 @@ static_library("hiview_lite") {
       "-nostdinc",
       "-nostdlib"
     ]
-    include_dirs = [
-      "//third_party/musl/porting/liteos_m/kernel/include"
-    ]
   } else {
     deps = []
   }

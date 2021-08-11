@@ -130,8 +130,11 @@ boolean ReadFileHeader(HiviewFile *fp)
     h.common.defineFileVersion = Change32Endian(h.common.defineFileVersion);
     h.createTime = Change32Endian(h.createTime);
 #endif
-    if ((ret == sizeof(HiviewFileHeader)) && (h.createTime < t) &&
-        ((h.common.prefix & 0xFFFFFF00) == HIVIEW_FILE_HEADER_PREFIX_MASK)) {
+    h.wCursor = HIVIEW_FileSize(fp->fhandle);
+    h.rCursor = sizeof(HiviewFileHeader);
+    if ((ret == sizeof(HiviewFileHeader)) &&
+        ((h.common.prefix & 0xFFFFFF00) == HIVIEW_FILE_HEADER_PREFIX_MASK) &&
+        (h.wCursor >= sizeof(HiviewFileHeader))) {
         memcpy_s(&(fp->header), sizeof(HiviewFileHeader), (void *)&h, sizeof(HiviewFileHeader));
         return TRUE;
     } else {
@@ -160,9 +163,6 @@ int32 WriteToFile(HiviewFile *fp, const uint8 *data, uint32 len)
         h->wCursor += len;
         wLen += len;
     }
-    if (WriteFileHeader(fp) == FALSE) {
-        return 0;
-    }
     return wLen;
 }
 
@@ -187,9 +187,6 @@ int32 ReadFromFile(HiviewFile *fp, uint8 *data, uint32 readLen)
     } else {
         rLen = 0;
     }
-    if (WriteFileHeader(fp) == FALSE) {
-        return 0;
-    }
     return rLen;
 }
 
@@ -213,9 +210,6 @@ uint32 GetFileFreeSize(HiviewFile *fp)
 int32 CloseHiviewFile(HiviewFile *fp)
 {
     if (fp != NULL && fp->fhandle > 0) {
-        if (WriteFileHeader(fp) == FALSE) {
-            return -1;
-        }
         if (strcmp(fp->outPath, HIVIEW_FILE_OUT_PATH_LOG) != 0) {
             HIVIEW_MemFree(MEM_POOL_HIVIEW_ID, fp->outPath);
             fp->outPath = HIVIEW_FILE_OUT_PATH_LOG;
@@ -289,7 +283,7 @@ int IsValidPath(const char *path)
 
 void RegisterFileWatcher(HiviewFile *fp, FileProc func, const char *path)
 {
-    if (fp == NULL) {
+    if (fp == NULL || func == NULL || path == NULL) {
         return;
     }
     fp->pFunc = func;
