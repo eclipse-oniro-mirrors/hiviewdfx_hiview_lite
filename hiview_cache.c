@@ -66,7 +66,7 @@ int32 WriteToCache(HiviewCache *cache, const uint8 *data, uint16 wLen)
     uint16 firstLen;
     uint16 secondLen;
     HIVIEW_MutexLock(cache->mutex);
-    if ((cache->size - cache->usedSize) < wLen) {
+    if (cache->size < wLen + cache->usedSize) {
         HIVIEW_MutexUnlock(cache->mutex);
         return -1;
     }
