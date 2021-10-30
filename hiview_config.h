@@ -64,7 +64,7 @@ extern "C" {
 
 #pragma pack(1)
 typedef struct {
-    const uint8 outputOption : 4; /* Control log output mode. Cannot be modified during running. */
+    uint8 outputOption : 4;       /* Control log output mode. */
     uint8 hiviewInited : 1;       /* Indicates whether the hiview service is inited. */
     uint8 level : 3;              /* Control log output level. HILOG_LV_XXX */
     uint8 logSwitch : 1;          /* Indicates whether to enable the log component. */
