@@ -20,8 +20,6 @@
 #include "ohos_types.h"
 #include "securec.h"
 
-static uint16 GetReadCursor(HiviewFile *fp);
-
 static uint32 GetDefineFileVersion(uint8 type)
 {
     switch (type) {
@@ -120,7 +118,6 @@ boolean ReadFileHeader(HiviewFile *fp)
     }
 
     int32 ret;
-    uint32 t = (uint32)(HIVIEW_GetCurrentTime() / MS_PER_SECOND);
     if (HIVIEW_FileSeek(fp->fhandle, 0, HIVIEW_SEEK_SET) < 0) {
         return FALSE;
     }
@@ -223,20 +220,26 @@ int32 CloseHiviewFile(HiviewFile *fp)
             HIVIEW_MemFree(MEM_POOL_HIVIEW_ID, fp->outPath);
             fp->outPath = HIVIEW_FILE_OUT_PATH_STAT_EVENT;
         }
-        return HIVIEW_FileClose(fp->fhandle);
+        int32 ret = HIVIEW_FileClose(fp->fhandle);
+        fp->fhandle = -1;
+        return ret;
     }
     return -1;
 }
 
 int8 ProcFile(HiviewFile *fp, const char *dest, FileProcMode mode)
 {
-    if (fp == NULL || fp->fhandle < 0 || HIVIEW_FileClose(fp->fhandle) != 0) {
+    if (fp == NULL || fp->fhandle < 0) {
         return -1;
     }
 
-    HIVIEW_MutexLockOrWait(fp->mutex, OUT_PATH_WAIT_TIMEOUT);
+    if (HIVIEW_MutexLockOrWait(fp->mutex, OUT_PATH_WAIT_TIMEOUT) != 0) {
+        HIVIEW_UartPrint("Procfile failed, get lock fail");
+        return -1;
+    }
     switch (mode) {
         case HIVIEW_FILE_COPY:{
+            HIVIEW_FileClose(fp->fhandle);
             int32 ret = HIVIEW_FileCopy(fp->path, dest);
             fp->fhandle = HIVIEW_FileOpen(fp->path);
             if (ret != 0 || fp->fhandle < 0) {
@@ -247,6 +250,7 @@ int8 ProcFile(HiviewFile *fp, const char *dest, FileProcMode mode)
             break;
         }
         case HIVIEW_FILE_RENAME: {
+            HIVIEW_FileClose(fp->fhandle);
             uint8 type = fp->header.common.type;
             uint32 size = fp->header.size - sizeof(HiviewFileHeader);
             int32 ret = HIVIEW_FileMove(fp->path, dest);

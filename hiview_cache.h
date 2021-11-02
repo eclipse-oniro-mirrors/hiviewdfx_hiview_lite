@@ -37,7 +37,6 @@ typedef enum {
 
 #pragma pack(1)
 typedef struct {
-    HiviewMutexId_t mutex;
     uint16 wCursor;    // 0-65535
     uint16 usedSize;   // 0-65535
     uint16 size;       // cache size 0-65535

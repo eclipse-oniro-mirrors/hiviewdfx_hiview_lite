@@ -26,13 +26,21 @@
 
 #include "cmsis_os.h"
 
+#if defined(CHIP_VER_Hi3861) || \
+    defined(CHIP_VER_Hi3861L) || \
+    defined(CHIP_VER_Hi3881)
+#include "los_hwi.h"
+#else
+#include "../../../kernel/liteos_m/kernel/arch/include/los_interrupt.h"
+#endif
+
 extern void HAL_NVIC_SystemReset(void);
 extern void __disable_irq(void);
 extern void __enable_irq(void);
 
-#define HIVIEW_WAIT_FOREVER           0xFFFFFFFF
+#define HIVIEW_WAIT_FOREVER           osWaitForever
 #define HIVIEW_MS_PER_SECOND          1000
-#define HIVIEW_NS_PER_MILISECOND      1000000
+#define HIVIEW_NS_PER_MILLISECOND     1000000
 #define BUFFER_SIZE                   128
 
 void *HIVIEW_MemAlloc(uint8 modId, uint32 size)
@@ -52,7 +60,7 @@ uint64 HIVIEW_GetCurrentTime()
     struct timespec current = {0};
     int ret = clock_gettime(CLOCK_REALTIME, &current);
     if (ret == 0) {
-        return (uint64)current.tv_sec * HIVIEW_MS_PER_SECOND + current.tv_nsec / HIVIEW_NS_PER_MILISECOND;
+        return (uint64)current.tv_sec * HIVIEW_MS_PER_SECOND + current.tv_nsec / HIVIEW_NS_PER_MILLISECOND;
     } else {
         return 0;
     }
@@ -70,28 +78,38 @@ HiviewMutexId_t HIVIEW_MutexInit()
     return (HiviewMutexId_t)osMutexNew(NULL);
 }
 
-void HIVIEW_MutexLock(HiviewMutexId_t mutex)
+int32 HIVIEW_MutexLock(HiviewMutexId_t mutex)
 {
     if (mutex == NULL) {
-        return;
+        return -1;
     }
-    osMutexAcquire((osMutexId_t)mutex, HIVIEW_WAIT_FOREVER);
+    return (int32)osMutexAcquire((osMutexId_t)mutex, HIVIEW_WAIT_FOREVER);
 }
 
-void HIVIEW_MutexLockOrWait(HiviewMutexId_t mutex, uint32 timeout)
+int32 HIVIEW_MutexLockOrWait(HiviewMutexId_t mutex, uint32 timeout)
 {
     if (mutex == NULL) {
-        return;
+        return -1;
     }
-    osMutexAcquire((osMutexId_t)mutex, timeout);
+    return (int32)osMutexAcquire((osMutexId_t)mutex, timeout);
 }
 
-void HIVIEW_MutexUnlock(HiviewMutexId_t mutex)
+int32 HIVIEW_MutexUnlock(HiviewMutexId_t mutex)
 {
     if (mutex == NULL) {
-        return;
+        return -1;
     }
-    osMutexRelease((osMutexId_t)mutex);
+    return (int32)osMutexRelease((osMutexId_t)mutex);
+}
+
+uint32 HIVIEW_IntLock()
+{
+    return LOS_IntLock();
+}
+
+void HIVIEW_IntRestore(uint32 intSave)
+{
+    LOS_IntRestore(intSave);
 }
 
 uint32 HIVIEW_GetTaskId()
@@ -101,7 +119,7 @@ uint32 HIVIEW_GetTaskId()
 
 void HIVIEW_UartPrint(const char *str)
 {
-    printf("%s", str);
+    printf("%s\n", str);
 }
 
 void HIVIEW_Sleep(uint32 ms)
@@ -169,7 +187,7 @@ int32 HIVIEW_FileCopy(const char *src, const char *dest)
     boolean copyFailed = TRUE;
     uint8 *dataBuf = (uint8 *)HIVIEW_MemAlloc(MEM_POOL_HIVIEW_ID, BUFFER_SIZE);
     if (dataBuf == NULL) {
-        HIVIEW_UartPrint("HIVIEW_FileCopy malloc erro");
+        HIVIEW_UartPrint("HIVIEW_FileCopy malloc error");
         goto MALLOC_ERROR;
     }
     int32 nLen = HIVIEW_FileRead(fdSrc, dataBuf, BUFFER_SIZE);
