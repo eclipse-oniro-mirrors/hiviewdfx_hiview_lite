@@ -43,6 +43,8 @@ typedef enum {
     HIVIEW_MSG_MAX
 } HiviewInnerMessage;
 
+#define SYNC_FILE 1
+
 typedef struct {
     INHERIT_IUNKNOWN;
     void (*Output)(IUnknown *iUnknown, int16 msgId, uint16 type);
