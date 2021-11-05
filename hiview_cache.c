@@ -26,7 +26,6 @@ boolean InitHiviewStaticCache(HiviewCache *cache, HiviewCacheType type, uint8 *b
         return FALSE;
     }
 
-    cache->mutex = HIVIEW_MutexInit();
     cache->usedSize = 0;
     cache->wCursor = 0;
     cache->buffer = buffer;
@@ -47,7 +46,6 @@ boolean InitHiviewCache(HiviewCache *cache, HiviewCacheType type, uint16 size)
         return FALSE;
     }
 
-    cache->mutex = HIVIEW_MutexInit();
     cache->usedSize = 0;
     cache->wCursor = 0;
     cache->buffer = buffer;
@@ -65,9 +63,9 @@ int32 WriteToCache(HiviewCache *cache, const uint8 *data, uint16 wLen)
 
     uint16 firstLen;
     uint16 secondLen;
-    HIVIEW_MutexLock(cache->mutex);
+    uint32 intSave = HIVIEW_IntLock();
     if (cache->size < wLen + cache->usedSize) {
-        HIVIEW_MutexUnlock(cache->mutex);
+        HIVIEW_IntRestore(intSave);
         return -1;
     }
     // overflow
@@ -78,7 +76,7 @@ int32 WriteToCache(HiviewCache *cache, const uint8 *data, uint16 wLen)
                 cache->wCursor += firstLen;
                 cache->usedSize += firstLen;
             } else {
-                HIVIEW_MutexUnlock(cache->mutex);
+                HIVIEW_IntRestore(intSave);
                 return -1;
             }
         }
@@ -89,7 +87,7 @@ int32 WriteToCache(HiviewCache *cache, const uint8 *data, uint16 wLen)
                 cache->wCursor += secondLen;
                 cache->usedSize += secondLen;
             } else {
-                HIVIEW_MutexUnlock(cache->mutex);
+                HIVIEW_IntRestore(intSave);
                 return firstLen;
             }
         }
@@ -98,11 +96,11 @@ int32 WriteToCache(HiviewCache *cache, const uint8 *data, uint16 wLen)
             cache->wCursor += wLen;
             cache->usedSize += wLen;
         } else {
-            HIVIEW_MutexUnlock(cache->mutex);
+            HIVIEW_IntRestore(intSave);
             return -1;
         }
     }
-    HIVIEW_MutexUnlock(cache->mutex);
+    HIVIEW_IntRestore(intSave);
 
     return wLen;
 }
@@ -140,9 +138,9 @@ int32 ReadFromCache(HiviewCache *cache, uint8 *data, uint16 rLen)
             return -1;
         }
     }
-    HIVIEW_MutexLock(cache->mutex);
+    uint32 intSave = HIVIEW_IntLock();
     cache->usedSize -= rLen;
-    HIVIEW_MutexUnlock(cache->mutex);
+    HIVIEW_IntRestore(intSave);
 
     return rLen;
 }
@@ -212,12 +210,12 @@ static uint16 GetReadCursor(HiviewCache *cache)
     }
 
     uint16 readCursor;
-    HIVIEW_MutexLock(cache->mutex);
+    uint32 intSave = HIVIEW_IntLock();
     if (cache->wCursor >= cache->usedSize) {
         readCursor = cache->wCursor - cache->usedSize;
     } else {
         readCursor = cache->size - (cache->usedSize - cache->wCursor);
     }
-    HIVIEW_MutexUnlock(cache->mutex);
+    HIVIEW_IntRestore(intSave);
     return readCursor;
 }
