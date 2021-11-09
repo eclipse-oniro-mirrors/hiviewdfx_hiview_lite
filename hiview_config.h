@@ -44,10 +44,14 @@ extern "C" {
 #define HIVIEW_FILE_PATH_STAT_EVENT        HIVIEW_FILE_OUT_PATH_STAT_EVENT".tmp"
 
 /* cache size config */
-#define LOG_STATIC_CACHE_SIZE              1024            /* Must be greater than HIVIEW_FILE_BUF_SIZE. */
-#define EVENT_CACHE_SIZE                   256             /* Must be greater than HIVIEW_FILE_BUF_SIZE. */
+#ifndef LOG_STATIC_CACHE_SIZE
+#define LOG_STATIC_CACHE_SIZE              1024            /* Must be greater than HIVIEW_HILOG_FILE_BUF_SIZE. */
+#endif
+#define EVENT_CACHE_SIZE                   256             /* Must be greater than HIVIEW_HIEVENT_FILE_BUF_SIZE. */
 #define JS_LOG_CACHE_SIZE                  512
+#ifndef HIVIEW_HILOG_FILE_BUF_SIZE
 #define HIVIEW_HILOG_FILE_BUF_SIZE         512
+#endif
 #define HIVIEW_HIEVENT_FILE_BUF_SIZE       128
 
 /* RAM dump config */
