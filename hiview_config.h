@@ -44,10 +44,14 @@ extern "C" {
 #define HIVIEW_FILE_PATH_STAT_EVENT        HIVIEW_FILE_OUT_PATH_STAT_EVENT".tmp"
 
 /* cache size config */
-#define LOG_STATIC_CACHE_SIZE              1024            /* Must be greater than HIVIEW_FILE_BUF_SIZE. */
-#define EVENT_CACHE_SIZE                   256             /* Must be greater than HIVIEW_FILE_BUF_SIZE. */
+#ifndef LOG_STATIC_CACHE_SIZE
+#define LOG_STATIC_CACHE_SIZE              1024            /* Must be greater than HIVIEW_HILOG_FILE_BUF_SIZE. */
+#endif
+#define EVENT_CACHE_SIZE                   256             /* Must be greater than HIVIEW_HIEVENT_FILE_BUF_SIZE. */
 #define JS_LOG_CACHE_SIZE                  512
+#ifndef HIVIEW_HILOG_FILE_BUF_SIZE
 #define HIVIEW_HILOG_FILE_BUF_SIZE         512
+#endif
 #define HIVIEW_HIEVENT_FILE_BUF_SIZE       128
 
 /* RAM dump config */
@@ -60,11 +64,11 @@ extern "C" {
 #define HIVIEW_FEATURE_ON                  1
 #define HIVIEW_FEATURE_OFF                 0
 
-#define OUT_PATH_WAIT_TIMEOUT              5               /* 5 seconds */
+#define OUT_PATH_WAIT_TIMEOUT              (5 * 1000)      /* 5 seconds */
 
 #pragma pack(1)
 typedef struct {
-    const uint8 outputOption : 4; /* Control log output mode. Cannot be modified during running. */
+    uint8 outputOption : 4;       /* Control log output mode. */
     uint8 hiviewInited : 1;       /* Indicates whether the hiview service is inited. */
     uint8 level : 3;              /* Control log output level. HILOG_LV_XXX */
     uint8 logSwitch : 1;          /* Indicates whether to enable the log component. */
