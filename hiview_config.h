@@ -47,12 +47,18 @@ extern "C" {
 #ifndef LOG_STATIC_CACHE_SIZE
 #define LOG_STATIC_CACHE_SIZE              1024            /* Must be greater than HIVIEW_HILOG_FILE_BUF_SIZE. */
 #endif
+#ifndef EVENT_CACHE_SIZE
 #define EVENT_CACHE_SIZE                   256             /* Must be greater than HIVIEW_HIEVENT_FILE_BUF_SIZE. */
+#endif
+#ifndef JS_LOG_CACHE_SIZE
 #define JS_LOG_CACHE_SIZE                  512
+#endif
 #ifndef HIVIEW_HILOG_FILE_BUF_SIZE
 #define HIVIEW_HILOG_FILE_BUF_SIZE         512
 #endif
+#ifndef HIVIEW_HIEVENT_FILE_BUF_SIZE
 #define HIVIEW_HIEVENT_FILE_BUF_SIZE       128
+#endif
 
 /* RAM dump config */
 #define HIVIEW_DUMP_PRE_SIZE               (384 * 1024)
