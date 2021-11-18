@@ -31,7 +31,7 @@
     defined(CHIP_VER_Hi3881)
 #include "los_hwi.h"
 #else
-#include "../../../kernel/liteos_m/kernel/arch/include/los_interrupt.h"
+#include "../../../kernel/liteos_m/arch/include/los_interrupt.h"
 #endif
 
 extern void HAL_NVIC_SystemReset(void);
