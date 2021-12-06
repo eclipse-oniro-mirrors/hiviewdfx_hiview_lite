@@ -64,12 +64,13 @@ int32 WriteToCache(HiviewCache *cache, const uint8 *data, uint16 wLen)
     uint16 firstLen;
     uint16 secondLen;
     uint32 intSave = HIVIEW_IntLock();
-    if (cache->size < wLen + cache->usedSize) {
+    // cast to uint32 for prevent uint16 overflow
+    if ((uint32)cache->size < (uint32)wLen + (uint32)cache->usedSize) {
         HIVIEW_IntRestore(intSave);
         return -1;
     }
-    // overflow
-    if (cache->wCursor + wLen > cache->size) {
+    // overflow, cast to uint32 for prevent uint16 overflow
+    if ((uint32)cache->wCursor + (uint32)wLen > (uint32)cache->size) {
         firstLen = cache->size - cache->wCursor;
         if (firstLen > 0) {
             if (memcpy_s(cache->buffer + cache->wCursor, firstLen, data, firstLen) == EOK) {
@@ -119,8 +120,8 @@ int32 ReadFromCache(HiviewCache *cache, uint8 *data, uint16 rLen)
         return -1;
     }
     rCursor = GetReadCursor(cache);
-    // overflow
-    if (rCursor + rLen > cache->size) {
+    // overflow, cast to uint32 for prevent uint16 overflow
+    if ((uint32)rCursor + (uint32)rLen > (uint32)cache->size) {
         firstLen = cache->size - rCursor;
         if (firstLen > 0) {
             if (memcpy_s(data, firstLen, cache->buffer + rCursor, firstLen) != EOK) {
@@ -157,8 +158,8 @@ int32 PrereadFromCache(HiviewCache *cache, uint8 *data, uint16 rLen)
     uint16 firstLen;
     uint16 secondLen;
     uint16 rCursor = GetReadCursor(cache);
-    // overflow
-    if (rCursor + rLen > cache->size) {
+    // overflow, cast to uint32 for prevent uint16 overflow
+    if ((uint32)rCursor + (uint32)rLen > (uint32)cache->size) {
         firstLen = cache->size - rCursor;
         if (firstLen > 0) {
             if (memcpy_s(data, firstLen, cache->buffer + rCursor, firstLen) != EOK) {
