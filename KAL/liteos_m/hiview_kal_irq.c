@@ -15,7 +15,7 @@ HiviewIrqState HiviewIrqLock(void)
     return (HiviewIrqState)LOS_IntLock();
 }
 
-void HiviewIrqUnlock(HiviewIrqState s)
+void HiviewIrqUnlock(HiviewIrqState state)
 {
-    LOS_IntRestore((uintptr_t)s);
+    LOS_IntRestore((uintptr_t)state);
 }
